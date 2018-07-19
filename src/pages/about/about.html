@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      About
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-fab #fab center middle>
+    <button ion-fab mini ><ion-icon name='share'></ion-icon></button>
+    <ion-fab-list side="top">
+      <button ion-fab (click)="share('star',fab)"><ion-icon name='star'></ion-icon></button>
+      <button ion-fab (click)="share('Twitter',fab)">Twitter</button>
+      <button ion-fab (click)="share('Youtube',fab)">Youtube</button>
+    </ion-fab-list>
+    <ion-fab-list side="right">
+      <button ion-fab (click)="share('star',fab)"><ion-icon name='star'></ion-icon></button>
+      <button ion-fab (click)="share('Twitter',fab)">Twitter</button>
+      <button ion-fab (click)="share('Youtube',fab)">Youtube</button>
+    </ion-fab-list>
+    <ion-fab-list side="left">
+      <button ion-fab (click)="share('star',fab)"><ion-icon name='star'></ion-icon></button>
+      <button ion-fab (click)="share('Twitter',fab)">Twitter</button>
+      <button ion-fab (click)="share('Youtube',fab)">Youtube</button>
+    </ion-fab-list>
+    <ion-fab-list side="bottom">
+      <button ion-fab (click)="share('star',fab)"><ion-icon name='star'></ion-icon></button>
+      <button ion-fab (click)="share('Twitter',fab)">Twitter</button>
+      <button ion-fab (click)="share('Youtube',fab)">Youtube</button>
+    </ion-fab-list>
+  </ion-fab>
+</ion-content>

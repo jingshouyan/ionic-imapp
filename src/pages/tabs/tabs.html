@@ -1,0 +1,9 @@
+<ion-tabs>
+  <ion-tab *ngFor="let tab of tabs" 
+  [root]="tab.root" 
+  [tabTitle]="tab.title" 
+  [tabIcon]="tab.icon"
+  [tabBadge]="tab.badge"
+  [tabBadgeStyle]="tab.badgeStyle"
+  ></ion-tab>  
+</ion-tabs>

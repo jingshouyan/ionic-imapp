@@ -1,0 +1,46 @@
+<ion-header>
+  <ion-navbar>
+    
+    <ion-buttons start>
+      <button ion-button icon-only>
+        <ion-icon name="contact"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title>Home</ion-title>
+    <ion-buttons end>
+      <button ion-button icon-only class="red-point">
+        <ion-icon name="search"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+    <ion-item >
+        <ion-label>Pepperoni</ion-label>
+        <ion-toggle [(ngModel)]="pepperoni" color="secondary"></ion-toggle>
+      </ion-item>
+  <ion-item>
+    <ion-label>Date</ion-label>
+    <ion-datetime [(ngModel)]='myDate' displayFormat="YYYY-MM-DD HH:mm" min="2016" max="2020-10-31"></ion-datetime>
+  </ion-item>
+      <ion-list [reorder]="reorder" (ionItemReorder)="$event.applyTo(checkboxs)">
+        <ion-item *ngFor="let c of checkboxs">
+          <ion-note item-start>left</ion-note>          
+          {{c.name}}
+          <ion-note item-end>right</ion-note>   
+          <!-- <ion-label>{{ c.name }}</ion-label>
+          <ion-checkbox [(ngModel)]='c.checked'></ion-checkbox> -->
+        </ion-item>
+      </ion-list>
+  <button ion-button block (click)='bClick($event)'>Action Sheet</button>
+  <h2>Welcome to Ionic!</h2>
+  <p>
+    This starter project comes with simple tabs-based layout for apps
+    that are going to primarily use a Tabbed UI.
+  </p>
+  <p>
+    Take a look at the <code>src/pages/</code> directory to add or change tabs,
+    update any existing page or create new pages.
+  </p>
+</ion-content>
