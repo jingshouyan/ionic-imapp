@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { SocketProvider } from "./socket.provider";
 import { DbProvider, TABLES } from "./db.provider";
-import { Msg } from "../app.model";
+import { Msg, Message } from "../app.model";
 
 @Injectable()
 export class MessageProvider {
@@ -15,6 +15,10 @@ export class MessageProvider {
       let msg = Msg.load(message)
       db.insert(msg,TABLES.Msg)
     })
+  }
+
+  send(message:Message){
+    this.socket.send(message)
   }
 
 }

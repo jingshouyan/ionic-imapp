@@ -23,6 +23,22 @@ export class Login {
   }
 }
 
+export class Register {
+  username: string
+  password: string
+  // password2: string
+  nickname: string
+  icon: string
+
+  constructor(opt?: any){
+    this.username = opt && opt.username || ''
+    this.password = opt && opt.password || ''
+    // this.password2 = opt && opt.password2 || ''
+    this.nickname = opt && opt.nickname || ''
+    this.icon = opt && opt.icon || ''
+  }
+}
+
 export class Rsp {
   code:number
   message:string

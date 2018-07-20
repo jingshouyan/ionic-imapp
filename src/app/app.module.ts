@@ -23,6 +23,7 @@ import { UserProvider } from './provider/user.provider';
 import { ApiProvider } from './provider/aip.provider';
 import { SocketProvider } from './provider/socket.provider';
 import { MessageProvider } from './provider/message.provider';
+import { RegisterPage } from '../pages/register/register';
 
 @NgModule({
   declarations: [
@@ -34,6 +35,7 @@ import { MessageProvider } from './provider/message.provider';
     LoginPage,
     AboutPage,
     HomePage,
+    RegisterPage,
   ],
   imports: [
     BrowserModule,
@@ -53,6 +55,7 @@ import { MessageProvider } from './provider/message.provider';
     LoginPage,
     HomePage,
     AboutPage,
+    RegisterPage,
   ],
   providers: [
     StatusBar,

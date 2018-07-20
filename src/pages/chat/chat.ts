@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
-import { SocketProvider } from '../../app/provider/socket.provider';
 import { MessageProvider } from '../../app/provider/message.provider';
+import { Message } from '../../app/app.model';
 
 /**
  * Generated class for the ChatPage page.
@@ -26,6 +26,16 @@ export class ChatPage {
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad ChatPage');
+    let message = new Message({
+      targetId:"123123",
+      targetType: "user",
+      messageType: "text",
+      text: {content: "heehda"}
+    })
+    // setInterval(()=>{
+    //   this.message.send(message)
+    // },10)
+    
   }
 
 }

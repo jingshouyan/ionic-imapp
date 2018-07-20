@@ -1,5 +1,5 @@
 <!--
-  Generated template for the LoginPage page.
+  Generated template for the RegisterPage page.
 
   See http://ionicframework.com/docs/components/#navigation for more info on
   Ionic pages and navigation.
@@ -7,18 +7,28 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>登陆</ion-title>
+    <ion-title>注册</ion-title>
   </ion-navbar>
 
 </ion-header>
 
 
 <ion-content padding>
+    <ion-item>
+        <ion-label fixed>昵称</ion-label>
+        <ion-input 
+        type="text" 
+        [(ngModel)]="reg.nickname" 
+        autocorrect=true
+        min=4
+        max=20
+        ></ion-input>
+      </ion-item>
   <ion-item>
     <ion-label fixed>用户名</ion-label>
     <ion-input 
     type="text" 
-    [(ngModel)]="loginModal.username" 
+    [(ngModel)]="reg.username" 
     autocorrect=true
     min=4
     max=20
@@ -27,13 +37,8 @@
 
   <ion-item>
     <ion-label fixed>密码</ion-label>
-    <ion-input [(ngModel)]="loginModal.password" type="password"></ion-input>
-  </ion-item>
-  <ion-item no-lines>
-    <label item-right>记住密码</label>
-    <ion-toggle  [(ngModel)]="loginModal.remember"></ion-toggle>
+    <ion-input [(ngModel)]="reg.password" type="password"></ion-input>
   </ion-item>
 
-  <button ion-button block (click)="login($event)">登陆</button>
   <button ion-button block (click)="register($event)">注册</button>
 </ion-content>

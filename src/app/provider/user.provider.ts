@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject, BehaviorSubject } from 'rxjs/Rx';
-import { User, Login, Token } from './../app.model';
+import { User, Login, Token, Register } from './../app.model';
 import { TokenProvider } from './token.provider';
 import { DbProvider, TABLES } from './db.provider';
 import { Storage } from '@ionic/storage';
@@ -79,5 +79,10 @@ export class UserProvider {
     this.api.post(endpoint,{})
     .subscribe(rsp => {})
     this.tokenProvider.setToken(new Token)
+  }
+
+  register(reg: Register){
+    const endpoint = "user/RegUser.json"
+    return this.api.post(endpoint, reg)    
   }
 }

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ToastController } from 'ionic-angular';
 import { Login } from '../../app/app.model';
 import { UserProvider } from '../../app/provider/user.provider';
+import { RegisterPage } from '../register/register';
 
 /**
  * Generated class for the LoginPage page.
@@ -45,6 +46,10 @@ export class LoginPage {
       return false;
     }
     this.userProvider.login(this.loginModal).subscribe(rsp => {});
+  }
+
+  register($event){
+    this.navCtrl.push(RegisterPage)
   }
 
   toast(msg:string){
