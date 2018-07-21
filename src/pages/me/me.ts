@@ -17,25 +17,26 @@ import { UserProvider } from '../../app/provider/user.provider';
 })
 export class MePage {
 
-  private me:User = new User
+  me:User = new User
 
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
-    public userProvider: UserProvider,
+    public user: UserProvider,
   ) {
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad MePage');
-    this.userProvider.currentUser.subscribe(user =>{
+    this.user.currentUser
+    .subscribe(user =>{
       console.log(user)
       this.me = user
     });
   }
 
   logout($event){
-    this.userProvider.logout();
+    this.user.logout();
   }
 
 }

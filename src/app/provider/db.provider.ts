@@ -92,27 +92,8 @@ export class DbProvider {
     }
   }
 
-
-  // private createUserTable() {
-  //   this.query(`
-  //   CREATE TABLE IF NOT EXISTS `+TABLES[TABLES.User]+`(
-  //     id TEXT PRIMERY KEY,
-  //     username TEXT,
-  //     nickname TEXT,
-  //     icon TEXT,
-  //     userType INTEGER,
-  //     createdAt INTEGER,
-  //     updatedAt INTEGER,
-  //     deletedAt INTEGER,
-  //     loadedAt INTEGER
-  //     )
-  //   `).catch(err => {
-  //     console.error('Storage: Unable to create initial storage User table', err.tx, err.err);
-  //   });
-  // }
-
-  list(table: TABLES): Promise<any> {
-    return this.query('SELECT * FROM ' + TABLES[table]).then(data => {
+  list(table: TABLES,condition: string = '1 = 1',params: any[] = []){
+    return this.query('SELECT * FROM ' + TABLES[table] + ' WHERE '+ condition,params).then(data => {
       if (data.res.rows.length > 0) {
         console.log('Rows found.',data);
         if (this.platform.is('cordova') && win.sqlitePlugin) {
@@ -136,6 +117,31 @@ export class DbProvider {
     });
   }
 
+  // list(table: TABLES): Promise<any> {
+  //   return this.query('SELECT * FROM ' + TABLES[table]).then(data => {
+  //     if (data.res.rows.length > 0) {
+  //       console.log('Rows found.',data);
+  //       if (this.platform.is('cordova') && win.sqlitePlugin) {
+  //         let result = [];
+  //         for (let i = 0; i < data.res.rows.length; i++) {
+  //           let row = data.res.rows.item(i);
+  //           result.push(row);
+  //         }
+  //         return result;
+  //       }
+  //       else {
+  //         let result = [];
+  //         for (let i = 0; i < data.res.rows.length; i++) {
+  //           let row = data.res.rows[i];
+  //           result.push(row);
+  //         }
+  //         return result;
+  //       }
+  //     }
+  //     return []
+  //   });
+  // }
+
   insert(newObject, table: TABLES): Promise<any> {
     return this.query('INSERT INTO ' + TABLES[table] + ' (' + this.getFieldNamesStr(newObject)
       + ') VALUES (' + this.getQ(newObject) + ")", this.getFieldValues(newObject));
@@ -146,10 +152,11 @@ export class DbProvider {
     return this.insert(newObject,table)
   }
 
-  private getFieldNamesStr(newObject) {
+  private getFieldNamesStr(object) {
     let fields = '';
-    for (let f in newObject) {
-      if(f=='constructor') continue
+    for (let f in object) {
+      let fv = object[f]
+      if(typeof fv === 'function') continue
       fields += f + ',';
     }
     fields = fields.substr(0, fields.length - 1);
@@ -159,7 +166,8 @@ export class DbProvider {
   private getQ(object){
     let fields = '';
     for (let f in object) {
-      if(f=='constructor') continue
+      let fv = object[f]
+      if(typeof fv === 'function') continue
       fields += '?,';
     }
     fields = fields.substr(0, fields.length - 1);
@@ -169,7 +177,8 @@ export class DbProvider {
   private getFieldValues(object) {
     let fields = [];
     for (let f in object) {
-      if(f=='constructor') continue
+      let fv = object[f]
+      if(typeof fv === 'function') continue
       fields.push(object[f]);
     }
     return fields;
@@ -183,7 +192,8 @@ export class DbProvider {
   private getFieldSetNamesStr(object) {
     let fields = '';
     for (let f in object) {
-      if(f=='constructor') continue
+      let fv = object[f]
+      if(typeof fv === 'function') continue
       if (f !== "id") fields += f + "=? ,";
     }
     fields = fields.substr(0, fields.length - 1);
@@ -193,8 +203,9 @@ export class DbProvider {
   private getFieldValuesArray(object) {
     let fields = [];
     for (let f in object) {
-      if(f=='constructor') continue
-      if (f !== "id") fields.push(object[f]);
+      let fv = object[f]
+      if(typeof fv === 'function') continue
+      if (f !== "id") fields.push(fv);
     }
     fields.push(object.id);
     return fields;

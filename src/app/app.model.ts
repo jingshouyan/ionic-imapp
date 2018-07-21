@@ -9,7 +9,14 @@ export class BaseBean {
     this.updatedAt = opt && opt.updatedAt || 0
     this.deletedAt = opt && opt.deletedAt || 0
     this.loadedAt = opt && opt.loadedAt || new Date().getTime()
-}
+  }
+
+  loadTime(){
+    return (new Date().getTime()) - this.loadedAt
+  }
+  deleted(){
+    return this.deletedAt > 0
+  }
 }
 
 export class Login {
@@ -80,6 +87,27 @@ export class User extends BaseBean{
     this.icon = opt && opt.icon || ''
     this.userType = opt && opt.userType || 1    
   }
+}
+
+export class UserInfo {
+  id: string
+  username: string
+  nickname: string
+  icon: string
+  userType: number
+  remark: string
+  isContact: boolean
+
+  constructor(opt?: any){
+    this.id = opt && opt.id || ''
+    this.username = opt && opt.username || ''
+    this.nickname = opt && opt.nickname || ''
+    this.icon = opt && opt.icon || ''
+    this.userType = opt && opt.userType || 1 
+    this.remark = opt && opt.remark || ''
+    this.isContact =  opt && !!opt.isContact
+  }
+
 }
 
 export class Contact extends BaseBean{

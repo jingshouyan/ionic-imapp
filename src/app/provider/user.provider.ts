@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Subject, BehaviorSubject } from 'rxjs/Rx';
+import { Subject, BehaviorSubject, Observable } from 'rxjs/Rx';
 import { User, Login, Token, Register } from './../app.model';
 import { TokenProvider } from './token.provider';
 import { DbProvider, TABLES } from './db.provider';
@@ -11,7 +11,10 @@ export class UserProvider {
 
   currentUser: Subject<User> = new BehaviorSubject<User>(new User)
   currentLogin: Subject<Login> = new BehaviorSubject<Login>(new Login)
+  cacheChange: Subject<User> = new Subject<User>()
+
   token: Token = new Token
+  userCache: {[id: string]: User} = {}
   constructor(
     private api: ApiProvider,    
     private tokenProvider: TokenProvider,
@@ -84,5 +87,96 @@ export class UserProvider {
   register(reg: Register){
     const endpoint = "user/RegUser.json"
     return this.api.post(endpoint, reg)    
+  }
+
+  search(q: string): Observable<User[]>{
+    const endpoint = "user/Search.json"
+    return this.api.post(endpoint,{q:q})
+    .map(rsp =>{
+      let users: User[] = []
+      if(rsp.code === 0 && rsp.data.length >0){
+        rsp.data.forEach(row => {
+          let user = new User(row)
+          users.push(user)
+        })
+      }
+      return users
+    })
+  }
+
+  getUserCache(id: string): Observable<User>{
+    return this.getUserMap([id])
+    .map(userMap => {
+      return userMap[id]
+    })
+  }
+
+  getUserMap(ids: string[]): Subject<{[id: string]: User}>{
+    let usersSub: Subject<{[id: string]: User}> = new Subject<{[id: string]: User}>()
+    let users: {[id: string]: User} = {}
+    let idNoCache: string[] = []
+    ids.forEach(id =>{
+      let user = this.userCache[id]
+      if(user){
+        users[user.id] = user
+      }else{
+        idNoCache.push(id)
+      }
+    })
+    if(idNoCache.length === 0){
+      usersSub.next(users)
+    }
+    else{
+      this.db.list(TABLES.User,"id in (?)",[idNoCache])
+      .then(rows => {
+        rows.forEach(row =>{
+          let user = new User(row)
+          users[user.id] = user
+          this.userCache[user.id] = user
+          idNoCache = idNoCache.filter(id => id != user.id)          
+        })
+        if(idNoCache.length === 0){
+          usersSub.next(users)
+        }else{
+          const endpoint = "user/GetUser.json"  
+          this.api.post(endpoint,{ids: idNoCache})
+          .subscribe(rsp =>{
+            if(rsp.code === 0 && rsp.data.length > 0){
+              rsp.data.foreach(row =>{
+                let user = new User(row)
+                users[user.id] = user
+                this.cache(user)
+              })
+            }
+          })
+        }
+      })
+    }  
+    return usersSub
+  }
+
+  getUser(id: string): Observable<User>{
+    let userSub = new Subject<User>()
+    let user = this.userCache[id]
+    if(user && user.loadTime() < 5000){
+      userSub.next(user)
+      return userSub
+    }
+    const endpoint = "user/GetUser.json"  
+    return this.api.post(endpoint,{ids: [id]})
+    .map(rsp =>{
+      let user: User = undefined
+      if(rsp.code === 0 && rsp.data.length > 0){
+        user = new User(rsp.data[0])
+        this.cache(user)
+      }
+      return user
+    })
+  }
+
+  private cache(user: User){
+    this.userCache[user.id] = user
+    this.db.replace(user,TABLES.User)
+    this.cacheChange.next(user)
   }
 }

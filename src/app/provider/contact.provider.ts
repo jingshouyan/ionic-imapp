@@ -14,7 +14,7 @@ export class ContactProvider {
   constructor(
     private api: ApiProvider,
     private db: DbProvider,
-    private token: TokenProvider,
+    token: TokenProvider,
   ){
     token.currentToken.subscribe(token =>{
       if(token && token.usable()){
@@ -38,21 +38,7 @@ export class ContactProvider {
     })
     .then(revision => {
       console.log("loaddata,version",revision)
-      this.listContact(revision)
-      .subscribe(rsp => {
-        if(rsp.code === 0){
-          rsp.data.forEach(row => {
-            row["id"] = row["userId"]
-            let contact = new Contact(row)
-            this.db.replace(contact,TABLES.Contact)
-            this.contactMap[contact.id] = contact
-            if(contact.revision > this.revision){
-              this.revision = contact.revision
-            }
-          })
-          this.pushContacts()
-        }
-      })
+      this.syncContacts()
     })
   }
 
@@ -68,8 +54,58 @@ export class ContactProvider {
     this.currentContacts.next(contacts)
   }
 
+  private syncContacts(){
+    this.listContact(this.revision)
+    .subscribe(rsp => {
+      console.log(rsp)
+      if(rsp.code === 0 && rsp.data.length > 0){
+        rsp.data.forEach(row => {
+          row["id"] = row["userId"]
+          let contact = new Contact(row)
+          this.db.replace(contact,TABLES.Contact)
+          this.contactMap[contact.id] = contact
+          if(contact.revision > this.revision){
+            this.revision = contact.revision
+          }
+        })
+        this.pushContacts()
+      }
+    })
+  }
+
+
   private listContact(revision) {
-    let endpoint = "relationship/ListContact.json";
+    let endpoint = "relationship/ListContact.json"
     return this.api.post(endpoint,{revision: revision})    
+  }
+
+  getContact(id: string): Contact{
+    let contact = this.contactMap[id]
+    if(contact && !contact.deleted()){
+      return contact
+    }
+    return undefined
+  }
+
+  addContact(opt: any){
+    let endpoint = "relationship/AddContact.json"
+    return this.api.post(endpoint,{userId: opt.userId,remark: opt.remark,type: opt.type})
+    .map(rsp =>{
+      if(rsp.code === 0){
+        this.syncContacts()
+      }
+      return rsp
+    })
+  }
+
+  delContact(id: string){
+    let endpoint = "relationship/DelContact.json"
+    return this.api.post(endpoint,{userId:id})
+    .map(rsp=>{
+      if(rsp.code === 0){
+        this.syncContacts()
+      }
+      return rsp
+    })
   }
 }

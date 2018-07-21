@@ -24,6 +24,8 @@ import { ApiProvider } from './provider/aip.provider';
 import { SocketProvider } from './provider/socket.provider';
 import { MessageProvider } from './provider/message.provider';
 import { RegisterPage } from '../pages/register/register';
+import { SearchPage } from '../pages/search/search';
+import { UserPage } from '../pages/user/user';
 
 @NgModule({
   declarations: [
@@ -36,9 +38,11 @@ import { RegisterPage } from '../pages/register/register';
     AboutPage,
     HomePage,
     RegisterPage,
+    SearchPage,
+    UserPage,
   ],
   imports: [
-    BrowserModule,
+  BrowserModule,
     HttpClientModule,
     IonicModule.forRoot(MyApp,{
       tabsHideOnSubPages: 'true'
@@ -56,6 +60,8 @@ import { RegisterPage } from '../pages/register/register';
     HomePage,
     AboutPage,
     RegisterPage,
+    SearchPage,
+    UserPage,
   ],
   providers: [
     StatusBar,
