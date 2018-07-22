@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core'  
 import { HttpInterceptor, HttpHandler, HttpRequest, HttpEvent, HttpResponse } from '@angular/common/http';  
 import { Observable } from 'rxjs';  
-import 'rxjs/add/operator/do';  
 import { UUID } from 'angular2-uuid';
 import { ToastController, LoadingController, Loading } from 'ionic-angular/umd';
 import { TokenProvider } from './provider/token.provider';

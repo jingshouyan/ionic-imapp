@@ -17,7 +17,7 @@ import { Thread } from '../../app/app.model';
 })
 export class ThreadPage {
 
-  threads: Thread[]
+  threads: Thread[] = []
 
   constructor(
     public navCtrl: NavController, 

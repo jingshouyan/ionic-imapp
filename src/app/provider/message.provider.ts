@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { SocketProvider } from "./socket.provider";
 import { DbProvider, TABLES } from "./db.provider";
 import { Msg, Message } from "../app.model";
-import { Subject } from "../../../node_modules/rxjs";
+import { Subject } from 'rxjs/Rx';
 
 @Injectable()
 export class MessageProvider {

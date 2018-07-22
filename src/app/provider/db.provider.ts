@@ -51,7 +51,6 @@ export class DbProvider {
       this.dropTable(TABLES.Thread);
       this.dropTable(TABLES.Msg);
     }
-    // this.createUserTable();
     this.createTable(TABLES.User,new User());
     this.createTable(TABLES.Contact,new Contact());
     this.createTable(TABLES.Thread,new Thread());
@@ -117,31 +116,7 @@ export class DbProvider {
     });
   }
 
-  // list(table: TABLES): Promise<any> {
-  //   return this.query('SELECT * FROM ' + TABLES[table]).then(data => {
-  //     if (data.res.rows.length > 0) {
-  //       console.log('Rows found.',data);
-  //       if (this.platform.is('cordova') && win.sqlitePlugin) {
-  //         let result = [];
-  //         for (let i = 0; i < data.res.rows.length; i++) {
-  //           let row = data.res.rows.item(i);
-  //           result.push(row);
-  //         }
-  //         return result;
-  //       }
-  //       else {
-  //         let result = [];
-  //         for (let i = 0; i < data.res.rows.length; i++) {
-  //           let row = data.res.rows[i];
-  //           result.push(row);
-  //         }
-  //         return result;
-  //       }
-  //     }
-  //     return []
-  //   });
-  // }
-
+ 
   insert(newObject, table: TABLES): Promise<any> {
     return this.query('INSERT INTO ' + TABLES[table] + ' (' + this.getFieldNamesStr(newObject)
       + ') VALUES (' + this.getQ(newObject) + ")", this.getFieldValues(newObject));

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Subject, BehaviorSubject, Observable } from 'rxjs';
+import { Subject, BehaviorSubject, Observable } from 'rxjs/Rx';
 import { User, Login, Token, Register } from '../app.model';
 import { TokenProvider } from './token.provider';
 import { DbProvider, TABLES } from './db.provider';

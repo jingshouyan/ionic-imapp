@@ -4,9 +4,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular/umd';
 import { MyApp } from './app.component';
 
-import { AboutPage } from '../pages/about/about';
 import { ContactPage } from '../pages/contact/contact';
-import { HomePage } from '../pages/home/home';
 import { TabsPage } from '../pages/tabs/tabs';
 import { ChatPage } from '../pages/chat/chat';
 import { LoginPage } from '../pages/login/login';
@@ -27,25 +25,24 @@ import { RegisterPage } from '../pages/register/register';
 import { SearchPage } from '../pages/search/search';
 import { UserPage } from '../pages/user/user';
 import { ThreadPage } from '../pages/thread/thread';
+import { ThreadProvider } from './provider/thread.provider';
 
 
 @NgModule({
   declarations: [
     MyApp,
+    LoginPage,
+    RegisterPage,
     TabsPage,
-    ChatPage,
+    ThreadPage,
     ContactPage,
     MePage,
-    LoginPage,
-    AboutPage,
-    HomePage,
-    RegisterPage,
     SearchPage,
     UserPage,
-    ThreadPage,
+    ChatPage,
   ],
   imports: [
-  BrowserModule,
+    BrowserModule,
     HttpClientModule,
     IonicModule.forRoot(MyApp,{
       tabsHideOnSubPages: 'true'
@@ -55,17 +52,15 @@ import { ThreadPage } from '../pages/thread/thread';
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,    
+    LoginPage,
+    RegisterPage,
     TabsPage,
-    ChatPage,
+    ThreadPage,
     ContactPage,
     MePage,
-    LoginPage,
-    HomePage,
-    AboutPage,
-    RegisterPage,
     SearchPage,
     UserPage,
-    ThreadPage,
+    ChatPage,
   ],
   providers: [
     StatusBar,
@@ -77,6 +72,7 @@ import { ThreadPage } from '../pages/thread/thread';
     ContactProvider,
     SocketProvider,
     MessageProvider,
+    ThreadProvider,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     {provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
   ]

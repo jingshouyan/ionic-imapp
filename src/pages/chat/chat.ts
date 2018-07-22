@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular/umd';
-import { MessageProvider } from '../../app/provider/message.provider';
 import { Message } from '../../app/app.model';
+import { MessageProvider } from './../../app/provider/message.provider';
 
 /**
  * Generated class for the ChatPage page.
