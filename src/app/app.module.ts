@@ -1,15 +1,15 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular/umd';
 import { MyApp } from './app.component';
 
 import { AboutPage } from '../pages/about/about';
 import { ContactPage } from '../pages/contact/contact';
 import { HomePage } from '../pages/home/home';
 import { TabsPage } from '../pages/tabs/tabs';
-import { ChatPage } from './../pages/chat/chat';
-import { LoginPage } from './../pages/login/login';
+import { ChatPage } from '../pages/chat/chat';
+import { LoginPage } from '../pages/login/login';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -20,12 +20,14 @@ import { DbProvider } from './provider/db.provider';
 import { TokenProvider } from './provider/token.provider';
 import { ContactProvider } from './provider/contact.provider';
 import { UserProvider } from './provider/user.provider';
-import { ApiProvider } from './provider/aip.provider';
+import { ApiProvider } from './provider/api.provider';
 import { SocketProvider } from './provider/socket.provider';
 import { MessageProvider } from './provider/message.provider';
 import { RegisterPage } from '../pages/register/register';
 import { SearchPage } from '../pages/search/search';
 import { UserPage } from '../pages/user/user';
+import { ThreadPage } from '../pages/thread/thread';
+
 
 @NgModule({
   declarations: [
@@ -40,6 +42,7 @@ import { UserPage } from '../pages/user/user';
     RegisterPage,
     SearchPage,
     UserPage,
+    ThreadPage,
   ],
   imports: [
   BrowserModule,
@@ -62,6 +65,7 @@ import { UserPage } from '../pages/user/user';
     RegisterPage,
     SearchPage,
     UserPage,
+    ThreadPage,
   ],
   providers: [
     StatusBar,

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, ToastController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, ToastController } from 'ionic-angular/umd';
 import { Login } from '../../app/app.model';
 import { UserProvider } from '../../app/provider/user.provider';
 import { RegisterPage } from '../register/register';

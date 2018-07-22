@@ -1,8 +1,8 @@
 export enum TABLES{ User, Contact, Thread,Msg }
 import { Injectable } from '@angular/core';
-import { Platform } from 'ionic-angular';
+import { Platform } from 'ionic-angular/umd';
 import { TokenProvider } from './token.provider';
-import { User, Thread, Contact, Msg } from './../app.model';
+import { User, Thread, Contact, Msg } from '../app.model';
 const win: any = window;
 @Injectable()
 export class DbProvider {
@@ -68,7 +68,7 @@ export class DbProvider {
   private createTable(table: TABLES,obj:any){
     let sql = 'CREATE TABLE IF NOT EXISTS '+TABLES[table]+'('
     for (let f in obj) {
-      if(f=='constructor') continue
+      if(typeof obj[f] === 'function') continue
       sql += f + ' ' + this.dbType(obj[f])
       if(f == 'id'){
         sql += ' PRIMERY KEY' 

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { Observable } from 'rxjs/Rx';
-import { Rsp } from './../app.model';
+import { Observable } from 'rxjs';
+import { Rsp } from '../app.model';
 
 @Injectable()
 export class ApiProvider {

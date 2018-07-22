@@ -134,23 +134,37 @@ export class Contact extends BaseBean{
 export class Thread extends BaseBean {
   id: string
   name: string
+  remark: string
   icon: string
   unread: number
   latestMessage: string
-  latestDate: number
+  latestTime: number
+  targetId: string
+  targetType: string
 
   constructor(opt?: any){
     super(opt)
     this.id = opt && opt.id || ''
     this.name = opt && opt.name || ''
+    this.remark = opt && opt.remark || ''
     this.icon = opt && opt.icon || ''
     this.unread = opt && opt.unread || 0   
     this.latestMessage = opt && opt.latestMessage || ''
-    this.latestDate = opt && opt.latestDate || new Date().getTime()
+    this.latestTime = opt && opt.latestTime || new Date().getTime()
+    this.targetId = opt && opt.targetId || ''
+    this.targetType = opt && opt.targetType || ''
+    if(this.targetId && this.targetType){
+      this.id = Thread.tid(this.targetId,this.targetType)
+    }
   }
+
+  static tid(id:string,type:string): string{
+    return id+"#"+type
+  }
+
 }
 export class Text {
-  content:String
+  content: string
 
   constructor(opt?: any){
     this.content = opt && opt.content || ''

@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { Platform } from 'ionic-angular';
+import { Platform } from 'ionic-angular/umd';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
 import { TabsPage } from '../pages/tabs/tabs';
-import { LoginPage } from './../pages/login/login';
+import { LoginPage } from '../pages/login/login';
 import { TokenProvider } from './provider/token.provider';
 
 @Component({

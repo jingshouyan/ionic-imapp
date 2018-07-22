@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Subject, BehaviorSubject } from 'rxjs/Rx';
-import { Token } from './../app.model';
+import { Subject, BehaviorSubject } from 'rxjs';
+import { Token } from '../app.model';
 import { Storage } from '@ionic/storage';
 
 @Injectable()

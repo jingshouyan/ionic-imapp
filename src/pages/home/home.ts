@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, ActionSheetController, AlertController, App, Events, ModalController } from 'ionic-angular';
+import { NavController, ActionSheetController, AlertController, App, Events, ModalController } from 'ionic-angular/umd';
 
 @Component({
   selector: 'page-home',

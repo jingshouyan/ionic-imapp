@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Subject, BehaviorSubject, Observable } from 'rxjs/Rx';
-import { User, Login, Token, Register } from './../app.model';
+import { Subject, BehaviorSubject, Observable } from 'rxjs';
+import { User, Login, Token, Register } from '../app.model';
 import { TokenProvider } from './token.provider';
 import { DbProvider, TABLES } from './db.provider';
 import { Storage } from '@ionic/storage';
-import { ApiProvider } from './aip.provider';
+import { ApiProvider } from './api.provider';
 
 @Injectable()
 export class UserProvider {

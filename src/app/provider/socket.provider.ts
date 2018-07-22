@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
 import { TokenProvider } from "./token.provider";
 import { Socket } from 'ng-socket-io';
-import { Subject } from 'rxjs/Rx';
-import { Message } from './../app.model';
+import { Subject } from 'rxjs';
+import { Message } from '../app.model';
 
 
 @Injectable()

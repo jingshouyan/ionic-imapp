@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, Events, FabContainer } from 'ionic-angular';
+import { NavController, Events, FabContainer } from 'ionic-angular/umd';
 
 @Component({
   selector: 'page-about',

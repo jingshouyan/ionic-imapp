@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Subject, BehaviorSubject } from 'rxjs/Rx';
+import { Subject, BehaviorSubject } from 'rxjs';
 import { Contact } from '../app.model';
 import { DbProvider, TABLES } from './db.provider';
 import { TokenProvider } from './token.provider';
-import { ApiProvider } from './aip.provider';
+import { ApiProvider } from './api.provider';
 
 @Injectable()
 export class ContactProvider {
 
   currentContacts: Subject<Contact[]> = new BehaviorSubject<Contact[]>([])
+  contactChange: Subject<Contact> = new Subject<Contact>()
   contactMap: {[id: string]: Contact} = {}
   revision: number = 0
   constructor(
@@ -29,6 +30,7 @@ export class ContactProvider {
       rows.forEach(row => {
         let contact = new Contact(row)
         this.contactMap[contact.id] = contact
+        this.contactChange.next(contact)
         if(contact.revision > this.revision){
           this.revision = contact.revision
         }
@@ -62,6 +64,7 @@ export class ContactProvider {
         rsp.data.forEach(row => {
           row["id"] = row["userId"]
           let contact = new Contact(row)
+          this.contactChange.next(contact)
           this.db.replace(contact,TABLES.Contact)
           this.contactMap[contact.id] = contact
           if(contact.revision > this.revision){

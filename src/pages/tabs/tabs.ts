@@ -1,21 +1,21 @@
 import { Component } from '@angular/core';
 
 import { ContactPage } from '../contact/contact';
-import { ChatPage } from '../chat/chat';
-import { MePage } from './../me/me';
+import { MePage } from '../me/me';
+import { ThreadPage } from '../thread/thread';
 
 @Component({
   templateUrl: 'tabs.html'
 })
 export class TabsPage {
 
-  chatTab = {title:"Chat",root:ChatPage,icon:"chatboxes",badge:"1",badgeStyle:"danger"};
-  contactTab = {title:"Contact",root:ContactPage,icon:"contacts",badge:"",badgeStyle:"danger"};
-  myTab = {title:"Me",root:MePage,icon:"person",badge:"",badgeStyle:"danger"};
+  threadTab = {title:"Chat",root:ThreadPage,icon:"chatboxes",badge:0,badgeStyle:"danger"};
+  contactTab = {title:"Contact",root:ContactPage,icon:"contacts",badge:0,badgeStyle:"danger"};
+  myTab = {title:"Me",root:MePage,icon:"person",badge:0,badgeStyle:"danger"};
 
 
   tabs: any[] = [
-    this.chatTab,
+    this.threadTab,
     this.contactTab,
     this.myTab,
   ];
