@@ -24,7 +24,6 @@ export class TokenProvider {
 
   setToken(token:Token): Promise<any>{
     this.currentToken.next(token)
-    return this.storage.set('token',JSON.stringify(token))
-    .then()
+    return this.storage.set('token',JSON.stringify(token))    
   }
 }
