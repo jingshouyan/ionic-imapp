@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular/umd';
+import { NavController } from 'ionic-angular';
 import { ContactProvider } from '../../app/provider/contact.provider';
 import { Contact } from '../../app/app.model';
 import { SearchPage } from '../search/search';

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core'
 import { HttpInterceptor, HttpHandler, HttpRequest, HttpEvent, HttpResponse } from '@angular/common/http';  
 import { Observable } from 'rxjs/Rx';  
 import { UUID } from 'angular2-uuid';
-import { ToastController, LoadingController, Loading } from 'ionic-angular/umd';
+import { ToastController, LoadingController, Loading } from 'ionic-angular';
 import { TokenProvider } from './provider/token.provider';
 import { Token } from './app.model';
 

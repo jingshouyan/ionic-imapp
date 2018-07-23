@@ -1,6 +1,6 @@
 export enum TABLES{ User, Contact, Thread,Msg }
 import { Injectable } from '@angular/core';
-import { Platform } from 'ionic-angular/umd';
+import { Platform } from 'ionic-angular';
 import { TokenProvider } from './token.provider';
 import { User, Thread, Contact, Msg } from '../app.model';
 const win: any = window;
