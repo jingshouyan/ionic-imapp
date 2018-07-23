@@ -147,5 +147,10 @@ export class ThreadProvider {
     })
   }
 
+  delThread(thread: Thread){
+    delete this.threadCache[thread.id]
+    this.db.delete(TABLES.Thread,thread)
+    this.nextThreads()
+  }
 
 }

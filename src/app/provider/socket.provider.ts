@@ -10,7 +10,7 @@ export class SocketProvider {
 
   newMessage: Subject<Message> = new Subject<Message>()
 
-  baseUrl: string = "http://127.0.0.1:8012?ticket="
+  baseUrl: string = "http://47.94.13.229?ticket="
   socket: Socket = undefined
 
 

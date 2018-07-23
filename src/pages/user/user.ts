@@ -3,6 +3,8 @@ import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { UserInfo } from '../../app/app.model';
 import { ContactProvider } from '../../app/provider/contact.provider';
 import { UserProvider } from '../../app/provider/user.provider';
+import { Thread } from './../../app/app.model';
+import { ChatPage } from './../chat/chat';
 
 /**
  * Generated class for the UserPage page.
@@ -53,6 +55,17 @@ export class UserPage {
         this.userInfo.isContact = true
       }
     })
+  }
+
+  chat($event){
+    let thread = new Thread({
+      name: this.userInfo.nickname,
+      remark: this.userInfo.remark,
+      icon: this.userInfo.icon,
+      targetId: this.userInfo.id,
+      targetType: 'user'
+    })
+    this.navCtrl.push(ChatPage,thread)
   }
 
 }

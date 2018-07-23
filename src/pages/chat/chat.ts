@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
-import { Message } from '../../app/app.model';
+import { Message, Thread } from '../../app/app.model';
 import { MessageProvider } from './../../app/provider/message.provider';
 
 /**
@@ -17,15 +17,19 @@ import { MessageProvider } from './../../app/provider/message.provider';
 })
 export class ChatPage {
 
+  thread: Thread
+
   constructor(
     public navCtrl: NavController, 
     public navParams: NavParams,
     public message: MessageProvider,
   ) {
+    this.thread = new Thread(navParams.data)
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad ChatPage');
+    let i = 0
     let message = new Message({
       targetId:"123123",
       targetType: "user",
@@ -33,8 +37,10 @@ export class ChatPage {
       text: {content: "heehda"}
     })
     // setInterval(()=>{
+    //   i++
+    //   message.text.content = this.thread.name+":"+i
     //   this.message.send(message)
-    // },10)
+    // },1000)
     
   }
 

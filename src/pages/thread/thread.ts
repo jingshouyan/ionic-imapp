@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { ThreadProvider } from '../../app/provider/thread.provider';
 import { Thread } from '../../app/app.model';
+import { ChatPage } from './../chat/chat';
 
 /**
  * Generated class for the ThreadPage page.
@@ -29,6 +30,14 @@ export class ThreadPage {
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad ThreadPage');
+  }
+
+  delete(thread: Thread){
+    this.thread.delThread(thread)
+  }
+
+  clickItem(thread: Thread){
+    this.navCtrl.push(ChatPage,thread)
   }
 
 }

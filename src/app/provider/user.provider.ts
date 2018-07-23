@@ -60,7 +60,7 @@ export class UserProvider {
   loadData(){
     this.db.find(TABLES.User,this.token.userId)
     .then(value => {
-      console.log(value)
+      console.log("db user",value)
       this.currentUser.next(new User(value))
     })
     .then(value =>{
@@ -70,7 +70,7 @@ export class UserProvider {
         if(rsp.code ===0 && rsp.data){
           let user = new User(rsp.data)
           this.db.replace(user,TABLES.User)
-          .then(value => this.currentUser.next(user))
+          .then(() => this.currentUser.next(user))
           .catch(e => console.log(e))
         }
       })

@@ -6,7 +6,7 @@ import { Rsp } from '../app.model';
 @Injectable()
 export class ApiProvider {
 
-  // url:string = "http://127.0.0.1:9000/api/"
+  // url:string = "http://47.94.13.229/api/"
   url:string = "/api/"
   constructor(
     private http:HttpClient,
