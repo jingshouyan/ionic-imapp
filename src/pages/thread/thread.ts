@@ -25,7 +25,9 @@ export class ThreadPage {
     public navParams: NavParams,
     public thread: ThreadProvider,
   ) {
-    thread.currentThreads.subscribe(ts => this.threads = ts)
+    thread.currentThreads.subscribe(ts => {
+      this.threads = ts
+    })
   }
 
   ionViewDidLoad() {

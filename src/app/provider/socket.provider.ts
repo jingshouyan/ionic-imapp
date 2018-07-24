@@ -1,18 +1,20 @@
 import { Injectable } from "@angular/core";
 import { TokenProvider } from "./token.provider";
 import { Socket } from 'ng-socket-io';
-import { Message } from '../app.model';
-import { Subject } from 'rxjs/Rx';
+import { Message, Rsp } from '../app.model';
+import { Subject, BehaviorSubject } from 'rxjs/Rx';
 
 
 @Injectable()
 export class SocketProvider {
 
   newMessage: Subject<Message> = new Subject<Message>()
+  conn: Subject<boolean> = new BehaviorSubject<boolean>(false)
 
-  baseUrl: string = "http://47.94.13.229?ticket="
-  socket: Socket = undefined
-
+  private baseUrl: string = "http://47.94.13.229?ticket="
+  private socket: Socket = undefined
+  private isConnected: boolean = false
+  
 
   constructor(
     private token:TokenProvider,
@@ -29,6 +31,16 @@ export class SocketProvider {
           this.onMessage(message)
           serverCallback && serverCallback()
         })
+        socket.on("connect",() =>{
+          console.log("socket connnected.")
+          this.isConnected = true
+          this.conn.next(true)
+        })
+        socket.on("disconnect",() =>{
+          console.log("socket disconnnected.")
+          this.isConnected = false
+          this.conn.next(false)
+        })
         socket.connect()
         this.socket = socket
       }else{
@@ -43,8 +55,27 @@ export class SocketProvider {
   }
 
   send(message:Message){
-    this.socket.emit("message",message,rsp =>{
-      console.log(rsp)
-    })
+    if(this.isConnected){
+      this.socket.emit("message",message,(rsp: Rsp) =>{        
+        if(rsp.code === 0) {
+          let msg = new Message(rsp.data)
+          console.log("send message return",rsp,msg)
+          if(message.id){
+            msg.failId = message.id
+          }
+          this.onMessage(msg)
+        }
+        else {
+          message.id = new Date().getTime()
+          message.failed = 1
+          this.onMessage(message)
+        }
+      })
+    }
+    else {
+      message.id = new Date().getTime()
+      message.failed = 1
+      this.onMessage(message)
+    }
   }
 }

@@ -179,7 +179,10 @@ export class Message {
   text: Text
   flag: number
   relatedUsers: string[]
-  sendAt: number
+  sentAt: number
+  localTime: number
+  failed: number
+  failId: number
 
   constructor(opt?: any){
     this.id = opt && opt.id || 0
@@ -190,7 +193,10 @@ export class Message {
     this.text = opt && opt.text
     this.flag = opt && opt.flag || 0
     this.relatedUsers = opt && opt.relatedUsers || []
-    this.sendAt = opt && opt.sendAt || 0
+    this.sentAt = opt && opt.sentAt || 0
+    this.localTime = opt && opt.localTime || new Date().getTime()
+    this.failed = opt && opt.failed || 0
+    this.failId = opt && opt.failId || 0
   }
 
   static load(opt?: any): Message{

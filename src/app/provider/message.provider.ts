@@ -13,7 +13,7 @@ export class MessageProvider {
     private socket: SocketProvider,
     private db: DbProvider,
   ){
-    this.newMessage.subscribe(socket.newMessage)
+    socket.newMessage.subscribe(this.newMessage)
 
     this.newMessage.subscribe(message =>{
       console.log(message)

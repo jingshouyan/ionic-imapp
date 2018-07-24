@@ -24,9 +24,10 @@ export class ThreadProvider {
       if(token && token.usable()){
         this.loadData()
         .then(v =>{
-
+          console.log("thread provider inited")
           //订阅新消息
           message.newMessage.subscribe(msg =>{
+            console.log("thread on message",msg)
             let targetId = msg.targetId
             let targetType = msg.targetType
             //单聊 以对方为 目标
@@ -38,9 +39,9 @@ export class ThreadProvider {
             let t = this.threadCache[tid]
             //获取缓存会话信息
             if(t){
-              msgCtx && (t.latestTime = msg.sendAt)
+              msgCtx && (t.latestTime = msg.localTime)
               msgCtx && (t.latestMessage = msgCtx)
-              t.unread = (msg.senderId == token.userId) && 0 || (t.unread + 1)
+              t.unread = (msg.senderId != token.userId) && (t.unread + 1) || 0
               this.pushThread(t)
             }
             else if(msgCtx) { //缓存中没有会话，并且信息需要展示
@@ -52,25 +53,25 @@ export class ThreadProvider {
                     remack: c.remark,
                     icon: c.icon,
                     latestMessage: msgCtx,
-                    latestTime: msg.sendAt,
+                    latestTime: msg.localTime,
                     targetId: targetId,
                     targetType: targetType
                   })
-                  thread.unread = (msg.senderId == token.userId) && 0 || (thread.unread + 1)
+                  thread.unread = (msg.senderId != token.userId) && (thread.unread + 1) || 0
                   this.pushThread(thread)
                 }
                 else { //不再联系人中
                   user.getUserCache(targetId)                  
                   .subscribe(u =>{
                     let thread = new Thread({
-                      name: u.nickname,
-                      icon: c.icon,
+                      name: u && u.nickname || targetId,
+                      icon: u && u.icon || '',
                       latestMessage: msgCtx,
-                      latestTime: msg.sendAt,
+                      latestTime: msg.localTime,
                       targetId: targetId,
                       targetType: targetType
                     })
-                    thread.unread = (msg.senderId == token.userId) && 0 || (thread.unread + 1)
+                    thread.unread = (msg.senderId != token.userId) && (thread.unread + 1) || 0
                     this.pushThread(thread)
                   })
                 }
