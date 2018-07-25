@@ -23,7 +23,7 @@ export class MessageProvider {
   }
 
   send(message:Message){
-    this.socket.send(message)
+    return this.socket.send(message)
   }
 
 }

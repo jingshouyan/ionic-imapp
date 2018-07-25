@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { TokenProvider } from "./token.provider";
 import { Socket } from 'ng-socket-io';
 import { Message, Rsp } from '../app.model';
-import { Subject, BehaviorSubject } from 'rxjs/Rx';
+import { Subject, BehaviorSubject, Observable } from 'rxjs/Rx';
 
 
 @Injectable()
@@ -54,28 +54,19 @@ export class SocketProvider {
     this.newMessage.next(message)
   }
 
-  send(message:Message){
-    if(this.isConnected){
-      this.socket.emit("message",message,(rsp: Rsp) =>{        
-        if(rsp.code === 0) {
-          let msg = new Message(rsp.data)
-          console.log("send message return",rsp,msg)
-          if(message.id){
-            msg.failId = message.id
-          }
-          this.onMessage(msg)
-        }
-        else {
-          message.id = new Date().getTime()
-          message.failed = 1
-          this.onMessage(message)
-        }
-      })
+  send(message:Message): Observable<void>{
+    let fun = (callback) => {
+      if(this.isConnected){
+        this.socket.emit("message",message,callback)
+      }
+      else {
+        let rsp = new Rsp
+        rsp.code = 10001
+        rsp.message = "socket disconneted!"
+        callback(rsp)
+      }
     }
-    else {
-      message.id = new Date().getTime()
-      message.failed = 1
-      this.onMessage(message)
-    }
+    let boundFun = Observable.bindCallback(fun)
+    return boundFun()
   }
 }

@@ -42,7 +42,7 @@ export class ChatPage {
       // setInterval(()=>{
         i++
         message.text.content = this.thread.name+":"+i
-        this.message.send(message)
+        this.message.send(message).subscribe(value => console.error(value))
       // },1000)
     })
   }
