@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { SocketProvider } from "./socket.provider";
 import { DbProvider, TABLES } from "./db.provider";
-import { Msg, Message } from "../app.model";
+import { Msg, Message, Rsp } from "../app.model";
 import { Subject } from 'rxjs/Rx';
 
 @Injectable()
@@ -22,8 +22,24 @@ export class MessageProvider {
     })
   }
 
-  send(message:Message){
-    return this.socket.send(message)
+  send(message: Message){
+    message.id = message.localId
+    message.state = 1
+    this.newMessage.next(message)
+    return this.socket.send(message).map(r =>{
+      let rsp = new Rsp(r)
+      this.db.delete(TABLES.Msg,message)
+      if(rsp.code === 0){
+        let msg = new Message(rsp.data)
+        msg.localId = message.localId
+        this.newMessage.next(msg)
+      }
+      else{
+        message.state = 2
+        this.newMessage.next(message)
+      }
+      return rsp
+    })
   }
 
 }

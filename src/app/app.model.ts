@@ -50,6 +50,12 @@ export class Rsp {
   code:number
   message:string
   data:any
+
+  constructor(opt?: any){
+    this.code = opt && opt.code || 0
+    this.message = opt && opt.message || ''
+    this.data = opt && opt.data || {}
+  }
 }
 
 export class Token extends BaseBean {
@@ -180,9 +186,10 @@ export class Message {
   flag: number
   relatedUsers: string[]
   sentAt: number
+  localId: number
   localTime: number
-  failed: number
-  failId: number
+  state: number // 消息状态，0 完成，1 发送中，2 失败
+
 
   constructor(opt?: any){
     this.id = opt && opt.id || 0
@@ -194,9 +201,10 @@ export class Message {
     this.flag = opt && opt.flag || 0
     this.relatedUsers = opt && opt.relatedUsers || []
     this.sentAt = opt && opt.sentAt || 0
+    this.localId = opt && opt.localId || new Date().getTime()
     this.localTime = opt && opt.localTime || new Date().getTime()
-    this.failed = opt && opt.failed || 0
-    this.failId = opt && opt.failId || 0
+    this.state = opt && opt.state || 0
+
   }
 
   static load(opt?: any): Message{
