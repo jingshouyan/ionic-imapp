@@ -19,7 +19,7 @@
 <ion-footer>
   <ion-navbar>
   <ion-item>
-    <ion-input [(ngModel)]="thread.draft"></ion-input>
+    <ion-input [(ngModel)]="thread.draft" #textInput></ion-input>
   </ion-item>
   <ion-buttons end>
       <button ion-button (click)="sendTextMessage()">

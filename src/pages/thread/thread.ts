@@ -42,4 +42,11 @@ export class ThreadPage {
     this.navCtrl.push(ChatPage,thread)
   }
 
+  p(thread: Thread){
+    if(thread.draft){
+      return "[草稿] "+thread.draft
+    }
+    return thread.latestMessage
+  }
+
 }

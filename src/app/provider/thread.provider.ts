@@ -125,7 +125,7 @@ export class ThreadProvider {
     return t || thread
   }
 
-  private pushThread(thread: Thread){
+  pushThread(thread: Thread){
     this.threadCache[thread.id] = thread
     this.db.replace(thread,TABLES.Thread)
     this.nextThreads()

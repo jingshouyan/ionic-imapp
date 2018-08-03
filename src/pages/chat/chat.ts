@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { Component, ViewChild } from '@angular/core';
+import { IonicPage, NavController, NavParams, TextInput } from 'ionic-angular';
 import { Message, Thread, Token } from '../../app/app.model';
 import { MessageProvider } from './../../app/provider/message.provider';
 import { TokenProvider } from '../../app/provider/token.provider';
 import { ThreadProvider } from '../../app/provider/thread.provider';
+import { Observable } from 'rxjs/Rx';
 
 /**
  * Generated class for the ChatPage page.
@@ -19,6 +20,9 @@ import { ThreadProvider } from '../../app/provider/thread.provider';
 })
 export class ChatPage {
 
+  @ViewChild("textInput")
+  textInput: TextInput
+
   thread: Thread
   token: Token
 
@@ -26,19 +30,23 @@ export class ChatPage {
     public navCtrl: NavController, 
     public navParams: NavParams,
     public messageProvider: MessageProvider,
-    token: TokenProvider,
-    threadProvider: ThreadProvider,
+    public tokenProvider: TokenProvider,
+    public threadProvider: ThreadProvider,
   ) {
     let t = new Thread(navParams.data)
     this.thread = threadProvider.getThread(t)
-    token.currentToken.subscribe(t =>{
+    tokenProvider.currentToken.subscribe(t =>{
       this.token = t
     })
   }
 
   ionViewDidLoad() {
-
-    
+    Observable.fromEvent(this.textInput.getNativeElement(),"keyup")
+    .map((e:any) => e.target.value)
+    .debounceTime(300)
+    .subscribe(value =>{
+      this.threadProvider.pushThread(this.thread)
+    })
   }
 
   sendTextMessage(){
