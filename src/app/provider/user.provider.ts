@@ -90,7 +90,7 @@ export class UserProvider {
   }
 
   search(q: string): Observable<User[]>{
-    const endpoint = "user/Search.json"
+    const endpoint = "user/SearchUser.json"
     return this.api.post(endpoint,{q:q})
     .map(rsp =>{
       let users: User[] = []
