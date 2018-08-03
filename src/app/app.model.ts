@@ -147,6 +147,7 @@ export class Thread extends BaseBean {
   latestTime: number
   targetId: string
   targetType: string
+  draft: string
 
   constructor(opt?: any){
     super(opt)
@@ -159,6 +160,7 @@ export class Thread extends BaseBean {
     this.latestTime = opt && opt.latestTime || new Date().getTime()
     this.targetId = opt && opt.targetId || ''
     this.targetType = opt && opt.targetType || ''
+    this.draft = opt && opt.draft || ''
     if(this.targetId && this.targetType){
       this.id = Thread.tid(this.targetId,this.targetType)
     }

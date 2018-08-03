@@ -3,6 +3,7 @@ import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { Message, Thread, Token } from '../../app/app.model';
 import { MessageProvider } from './../../app/provider/message.provider';
 import { TokenProvider } from '../../app/provider/token.provider';
+import { ThreadProvider } from '../../app/provider/thread.provider';
 
 /**
  * Generated class for the ChatPage page.
@@ -24,33 +25,32 @@ export class ChatPage {
   constructor(
     public navCtrl: NavController, 
     public navParams: NavParams,
-    public message: MessageProvider,
+    public messageProvider: MessageProvider,
     token: TokenProvider,
+    threadProvider: ThreadProvider,
   ) {
-    this.thread = new Thread(navParams.data)
+    let t = new Thread(navParams.data)
+    this.thread = threadProvider.getThread(t)
     token.currentToken.subscribe(t =>{
-      console.error("chat token",t)
       this.token = t
-      let i = 0
-      let message = new Message({
-        senderId: this.token.userId,
-        targetId:this.thread.targetId,
-        targetType: this.thread.targetType,
-        messageType: "text",
-        text: {content: "heehda"}
-      })
-      // setInterval(()=>{
-        i++
-        message.text.content = this.thread.name+":"+i
-        this.message.send(message).subscribe(value => console.error(value))
-      // },1000)
     })
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad ChatPage');
 
     
+  }
+
+  sendTextMessage(){
+    let message = new Message({
+      senderId: this.token.userId,
+      targetId:this.thread.targetId,
+      targetType: this.thread.targetType,
+      messageType: "text",
+      text: {content: this.thread.draft}
+    })
+    this.thread.draft = ""
+    this.messageProvider.send(message).subscribe(rsp => {})
   }
 
 }

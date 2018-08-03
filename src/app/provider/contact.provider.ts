@@ -24,7 +24,8 @@ export class ContactProvider {
     })
   }
 
-  loadData(){    
+  loadData(){
+    this.contactMap = {}    
     this.db.list(TABLES.Contact)
     .then(rows =>{
       rows.forEach(row => {

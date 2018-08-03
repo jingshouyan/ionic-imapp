@@ -117,6 +117,14 @@ export class ThreadProvider {
     return msgCtx
   }
 
+  getThread(thread: Thread){
+    let t = this.threadCache[thread.id]
+    if(!t){
+      this.pushThread(thread)
+    }
+    return t || thread
+  }
+
   private pushThread(thread: Thread){
     this.threadCache[thread.id] = thread
     this.db.replace(thread,TABLES.Thread)
