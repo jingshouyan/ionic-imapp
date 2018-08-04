@@ -112,6 +112,10 @@ export class UserInfo {
     return this.icon || "assets/imgs/avatar.jpg"
   }
 
+  name() {
+    return this.remark || this.nickname || '';
+  }
+
   constructor(opt?: any){
     this.id = opt && opt.id || ''
     this.username = opt && opt.username || ''

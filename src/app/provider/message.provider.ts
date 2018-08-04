@@ -59,6 +59,7 @@ export class MessageProvider {
 
 
   send(message: Message){
+    console.log(message)
     message.id = message.localId
     message.senderId = this.token.userId;
     message.threadId = message.tid(this.token.userId);

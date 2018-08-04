@@ -5,6 +5,7 @@ import { TokenProvider } from './token.provider';
 import { DbProvider, TABLES } from './db.provider';
 import { Storage } from '@ionic/storage';
 import { ApiProvider } from './api.provider';
+import _ from 'underscore';
 
 @Injectable()
 export class UserProvider {
@@ -105,7 +106,7 @@ export class UserProvider {
   }
 
   getUserCache(id: string): Observable<User>{
-    return this.getUserMap([id])
+    return this.getUserMap2([id])
     .map(userMap => {
       return userMap[id] || new User
     })
@@ -142,17 +143,67 @@ export class UserProvider {
           this.api.post(endpoint,{ids: idNoCache})
           .subscribe(rsp =>{
             if(rsp.code === 0 && rsp.data.length > 0){
-              rsp.data.foreach(row =>{
+              _.chain(rsp.data).forEach(row =>{
                 let user = new User(row)
                 users[user.id] = user
                 this.cache(user)
               })
             }
+            usersSub.next(users)
           })
         }
       })
     }  
     return usersSub
+  }
+
+
+  getUserMap2(ids: string[]): Observable<void>{
+    let fun = (callback) =>{
+      let users: {[id: string]: User} = {}
+      let idNoCache: string[] = []
+      ids.forEach(id =>{
+        let user = this.userCache[id]
+        if(user){
+          users[user.id] = user
+        }else{
+          idNoCache.push(id)
+        }
+      })
+      if(idNoCache.length === 0){
+        callback(users)
+      }
+      else{
+        this.db.list(TABLES.User,"id in (?)",[idNoCache])
+        .then(rows => {
+          rows.forEach(row =>{
+            let user = new User(row)
+            users[user.id] = user
+            this.userCache[user.id] = user
+            idNoCache = idNoCache.filter(id => id != user.id)          
+          })
+          if(idNoCache.length === 0){
+            callback(users)
+          }else{
+            const endpoint = "user/GetUser.json"  
+            this.api.post(endpoint,{ids: idNoCache})
+            .subscribe(rsp =>{
+              if(rsp.code === 0 && rsp.data.length > 0){
+                _.chain(rsp.data).forEach(row =>{
+                  let user = new User(row)
+                  users[user.id] = user
+                  this.cache(user)
+                })
+              }
+              callback(users)
+            })
+          }
+        })
+      }
+      return users;
+    }
+    let obs = Observable.bindCallback(fun)
+    return obs();
   }
 
   getUser(id: string): Observable<User>{

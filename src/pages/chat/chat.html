@@ -11,13 +11,38 @@
   </ion-navbar>
 
 </ion-header>
-<ion-content padding>
-  <ion-list>
-    <ion-item *ngFor="let message of messages">
-      <p> {{ message.senderId }}:{{ message.text.content }} </p>
-      <p></p>
-    </ion-item>
-  </ion-list>
+<ion-content>
+  <!-- <ion-list no-lines>
+    <ion-card *ngFor="let message of messages" no-lines>
+        <ion-item >
+            <ion-avatar item-start>
+                <img [src]="uInfoMap[message.senderId].avatar()">
+                <p> {{ (uInfoMap[message.senderId])?.name() }} </p>
+            </ion-avatar>        
+        </ion-item>
+        <ion-card-content>
+          <p>{{ message.text.content }}</p>
+        </ion-card-content>
+    </ion-card>
+    
+  </ion-list> -->
+
+  <ion-grid>
+      <ion-row *ngFor="let message of messages">
+        <ion-col col-3>
+            <ion-item >
+                <ion-avatar item-start>
+                    <img [src]="uInfoMap[message.senderId].avatar()">
+                    <p> {{ (uInfoMap[message.senderId])?.name() }} </p>
+                </ion-avatar>        
+            </ion-item>
+        </ion-col>
+        <ion-col col-8>
+            <p>{{ message.text.content }}</p>
+          </ion-col>
+      </ion-row>
+    </ion-grid>
+
 </ion-content>
 <ion-footer>
   <ion-navbar>

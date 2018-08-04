@@ -20,9 +20,10 @@
             <ion-avatar item-start>
               <img [src]="item.avatar()">
             </ion-avatar>
-            <h2>{{ item.name }}</h2>
+            <h2>{{ item.name }} <ion-badge color="danger" *ngIf="item.unread">{{item.unread}}</ion-badge></h2>
             <p> {{ p(item) }}</p>
-            <ion-badge color="danger" *ngIf="item.unread" item-end>{{item.unread}}</ion-badge>
+            
+            <ion-note item-end>{{item.latestTime | date:'HH:mm:ss'| lowercase}}</ion-note>
           </ion-item>
           <ion-item-options side="right">
             <button ion-button (click)="delete(item);itemSliding.close()">
