@@ -28,6 +28,7 @@ export class SocketProvider {
         let socket = new Socket(config)
         socket.on('message', (data,serverCallback) => {
           let message = new Message(data)
+          message.threadId = message.tid(token.userId)
           this.onMessage(message)
           serverCallback && serverCallback()
         })

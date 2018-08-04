@@ -6,7 +6,7 @@ import { MessageProvider } from "./message.provider";
 import { Subject, BehaviorSubject, Observable } from 'rxjs/Rx';
 import { ContactProvider } from "./contact.provider";
 import { UserProvider } from './user.provider';
-import * as _ from 'underscore';
+import _ from 'underscore';
 @Injectable()
 export class ThreadProvider {
 
@@ -38,7 +38,7 @@ export class ThreadProvider {
               targetId = msg.senderId
             }
             let msgCtx = this.msgCtx(msg)
-            let tid = Thread.tid(targetId,targetType)
+            let tid = msg.threadId
             let t = this.threadCache[tid]
             //获取缓存会话信息
             if(t){
@@ -172,6 +172,22 @@ export class ThreadProvider {
       .filter(message => message.tid(this.token.userId) === tid)
       .value();
     })
+  }
+
+  threadMessage(tid: string){
+    return this.message.newMessage.filter(message => message.threadId == tid)
+  }
+
+  pullMessage(tid:string,timestamp: number ,size: number = 100): Observable<Message>{
+    let pull: Subject<Message> = new Subject<Message>()
+    this.db.list(TABLES.Msg,"threadId = ? and sentAt < ? order by sentAt desc limit 0, ?",[tid,timestamp,size])
+    .then(rows =>{
+      _.chain(rows).forEach(row =>{
+        let message = Message.load(row);
+        pull.next(message);
+      });
+    });
+    return pull;
   }
 
 

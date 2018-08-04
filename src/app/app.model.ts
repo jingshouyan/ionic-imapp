@@ -1,4 +1,3 @@
-
 export class BaseBean {
   createdAt: number
   updatedAt: number
@@ -86,6 +85,10 @@ export class User extends BaseBean{
   icon: string
   userType: number
 
+  avatar(){
+    return this.icon || "assets/imgs/avatar.jpg"
+  }
+
   constructor(opt?: any){
     super(opt)
     this.id = opt && opt.id || ''
@@ -104,6 +107,10 @@ export class UserInfo {
   userType: number
   remark: string
   isContact: boolean
+
+  avatar(){
+    return this.icon || "assets/imgs/avatar.jpg"
+  }
 
   constructor(opt?: any){
     this.id = opt && opt.id || ''
@@ -125,6 +132,10 @@ export class Contact extends BaseBean{
   remark: string
   type: number
   revision: number
+
+  avatar(){
+    return this.icon || "assets/imgs/avatar.jpg"
+  }
 
   constructor(opt?: any){
     super(opt)
@@ -149,6 +160,11 @@ export class Thread extends BaseBean {
   targetId: string
   targetType: string
   draft: string
+
+  avatar(){
+    return this.icon || "assets/imgs/avatar.jpg"
+  }
+
 
   constructor(opt?: any){
     super(opt)
@@ -192,6 +208,7 @@ export class Message {
   localId: number
   localTime: number
   state: number // 消息状态，0 完成，1 发送中，2 失败
+  threadId: string
 
   tid(myId:String): string{
     if(this.targetId === myId){
@@ -213,7 +230,7 @@ export class Message {
     this.localId = opt && opt.localId || new Date().getTime()
     this.localTime = opt && opt.localTime || new Date().getTime()
     this.state = opt && opt.state || 0
-
+    this.threadId = opt && opt.threadId || ''
   }
 
   static load(opt?: any): Message{
@@ -235,7 +252,8 @@ export class Msg {
   data: string
   flag: number
   relatedUsers: string
-  sendAt: number
+  sentAt: number
+  threadId: string
 
   constructor(opt?: any){
     this.id = opt && opt.id || 0
@@ -246,7 +264,8 @@ export class Msg {
     this.data = opt && opt.data || '{}'
     this.flag = opt && opt.flag || 0
     this.relatedUsers = opt && opt.relatedUsers || ''
-    this.sendAt = opt && opt.sendAt || 0
+    this.sentAt = opt && opt.sentAt || 0
+    this.threadId = opt && opt.threadId || ''
   }
 
   static load(opt?: any): Msg {

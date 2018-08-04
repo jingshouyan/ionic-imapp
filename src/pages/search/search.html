@@ -23,7 +23,7 @@
   <ion-list>
     <ion-item *ngFor="let item of items" (click)="clickItem(item)">
       <ion-avatar item-start>
-        <img [src]="item.icon">
+        <img [src]="item.avatar()">
       </ion-avatar>
       <h2>{{ item.nickname }}</h2>
     </ion-item>

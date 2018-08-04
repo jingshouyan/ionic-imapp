@@ -1,8 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { IonicPage, NavController, NavParams, TextInput } from 'ionic-angular';
-import { Message, Thread, Token } from '../../app/app.model';
+import { Message, Thread } from '../../app/app.model';
 import { MessageProvider } from './../../app/provider/message.provider';
-import { TokenProvider } from '../../app/provider/token.provider';
 import { ThreadProvider } from '../../app/provider/thread.provider';
 import { Observable } from 'rxjs/Rx';
 
@@ -24,26 +23,22 @@ export class ChatPage {
   textInput: TextInput
 
   thread: Thread
-  token: Token
 
-  messages: Message[];
+  messages: Message[] = [];
 
   constructor(
     public navCtrl: NavController, 
     public navParams: NavParams,
     public messageProvider: MessageProvider,
-    public tokenProvider: TokenProvider,
     public threadProvider: ThreadProvider,
   ) {
     let t = new Thread(navParams.data)
     this.thread = threadProvider.getThread(t)
-    tokenProvider.currentToken.subscribe(t =>{
-      this.token = t
-    })
-    threadProvider.threadMessages(t.id)
-    .subscribe(messages => {
-      console.log(messages)
-      this.messages = messages
+    this.pull()
+    threadProvider.threadMessage(this.thread.id)
+    .subscribe(message =>{
+      console.log(message)
+      this.messages.push(message);
     });
   }
 
@@ -56,9 +51,19 @@ export class ChatPage {
     })
   }
 
+  pull(){
+    let timestamp = new Date().getTime();
+    if(this.messages.length>0){
+      timestamp = this.messages[0].sentAt;
+    }
+    this.threadProvider.pullMessage(this.thread.id,timestamp)
+    .subscribe(message =>{
+      this.messages.unshift(message);
+    });
+  }
+
   sendTextMessage(){
     let message = new Message({
-      senderId: this.token.userId,
       targetId:this.thread.targetId,
       targetType: this.thread.targetType,
       messageType: "text",

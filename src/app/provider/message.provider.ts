@@ -3,6 +3,8 @@ import { SocketProvider } from "./socket.provider";
 import { DbProvider, TABLES } from "./db.provider";
 import { Msg, Message, Rsp } from "../app.model";
 import { Subject, Observable } from 'rxjs/Rx';
+import { TokenProvider } from "./token.provider";
+import { Token } from './../app.model';
 
 
 
@@ -22,12 +24,18 @@ export class MessageProvider {
 
   create: Subject<Message> = new Subject<Message>()
 
+  token: Token = new Token;
 
   constructor(
     private socket: SocketProvider,
     private db: DbProvider,
+    token: TokenProvider,
   ){
-
+    token.currentToken.subscribe(t=>{
+      if(t && t.usable()){
+        this.token = t;
+      }
+    });
     socket.newMessage.subscribe(this.newMessage)
 
     this.newMessage.subscribe(message =>{
@@ -52,6 +60,8 @@ export class MessageProvider {
 
   send(message: Message){
     message.id = message.localId
+    message.senderId = this.token.userId;
+    message.threadId = message.tid(this.token.userId);
     message.state = 1
     // this.newMessage.next(message)
     return this.socket.send(message).map(r =>{
@@ -59,6 +69,7 @@ export class MessageProvider {
       this.db.delete(TABLES.Msg,message)
       if(rsp.code === 0){
         let msg = new Message(rsp.data)
+        msg.threadId = msg.tid(this.token.userId);
         msg.localId = message.localId
         this.newMessage.next(msg)
       }

@@ -44,7 +44,7 @@ export class UserPage {
     }
     this.user.getUser(this.userInfo.id)
     .subscribe(user => {
-      this.userInfo = Object.assign({},this.userInfo,user)
+      this.userInfo = new UserInfo(Object.assign({},this.userInfo,user));
     })
   }
 
