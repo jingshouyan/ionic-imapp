@@ -1,27 +1,30 @@
 import { Injectable } from "@angular/core";
 import { DbProvider, TABLES } from "./db.provider";
 import { TokenProvider } from "./token.provider";
-import { Thread, Message } from "../app.model";
+import { Thread, Message ,Token } from "../app.model";
 import { MessageProvider } from "./message.provider";
-import { Subject, BehaviorSubject } from 'rxjs/Rx';
+import { Subject, BehaviorSubject, Observable } from 'rxjs/Rx';
 import { ContactProvider } from "./contact.provider";
 import { UserProvider } from './user.provider';
-
+import * as _ from 'underscore';
 @Injectable()
 export class ThreadProvider {
 
   private threadCache: {[id: string]: Thread} = {}
-  public currentThreads: Subject<Thread[]> = new BehaviorSubject<Thread[]>([])
+  currentThreads: Subject<Thread[]> = new BehaviorSubject<Thread[]>([])
+  private token : Token = new Token;
+
 
   constructor(
     private db :DbProvider,
     token: TokenProvider,
-    message: MessageProvider,
+    private message: MessageProvider,
     contact: ContactProvider,
     user: UserProvider,
   ){
     token.currentToken.subscribe(token =>{
       if(token && token.usable()){
+        this.token = token;
         this.loadData()
         .then(v =>{
           console.log("thread provider inited")
@@ -161,5 +164,15 @@ export class ThreadProvider {
     this.db.delete(TABLES.Thread,thread)
     this.nextThreads()
   }
+
+
+  threadMessages(tid: string): Observable<Message[]>{
+    return this.message.messages.map((messages: Message[]) => {
+      return _.chain(messages)
+      .filter(message => message.tid(this.token.userId) === tid)
+      .value();
+    })
+  }
+
 
 }

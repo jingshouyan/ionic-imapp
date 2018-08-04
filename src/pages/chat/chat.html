@@ -13,7 +13,10 @@
 </ion-header>
 <ion-content padding>
   <ion-list>
-    
+    <ion-item *ngFor="let message of messages">
+      <p> {{ message.senderId }}:{{ message.text.content }} </p>
+      <p></p>
+    </ion-item>
   </ion-list>
 </ion-content>
 <ion-footer>

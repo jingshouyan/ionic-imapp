@@ -26,6 +26,8 @@ export class ChatPage {
   thread: Thread
   token: Token
 
+  messages: Message[];
+
   constructor(
     public navCtrl: NavController, 
     public navParams: NavParams,
@@ -38,6 +40,11 @@ export class ChatPage {
     tokenProvider.currentToken.subscribe(t =>{
       this.token = t
     })
+    threadProvider.threadMessages(t.id)
+    .subscribe(messages => {
+      console.log(messages)
+      this.messages = messages
+    });
   }
 
   ionViewDidLoad() {

@@ -3,7 +3,8 @@ import { SocketProvider } from "./socket.provider";
 import { DbProvider, TABLES } from "./db.provider";
 import { Msg, Message, Rsp } from "../app.model";
 import { Subject, Observable } from 'rxjs/Rx';
-// import * as _ from 'underscore';
+
+
 
 let initialMessages: Message[] = [];
 interface IMessagesOperation extends Function {
@@ -26,6 +27,7 @@ export class MessageProvider {
     private socket: SocketProvider,
     private db: DbProvider,
   ){
+
     socket.newMessage.subscribe(this.newMessage)
 
     this.newMessage.subscribe(message =>{
@@ -47,18 +49,11 @@ export class MessageProvider {
     this.newMessage.subscribe(this.create)
   }
 
-  // threadMessages(tid: string){
-  //   return this.messages.map(messages => {
-  //     return _.chain(messages)
-  //     .filter(message => message.tid() === tid)
-  //     .values();
-  //   })
-  // }
 
   send(message: Message){
     message.id = message.localId
     message.state = 1
-    this.newMessage.next(message)
+    // this.newMessage.next(message)
     return this.socket.send(message).map(r =>{
       let rsp = new Rsp(r)
       this.db.delete(TABLES.Msg,message)

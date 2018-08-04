@@ -16,15 +16,15 @@
 <ion-content>
     <ion-list>
         <ion-item-sliding *ngFor="let item of threads" #itemSliding>
-        <ion-item (click)="clickItem(item)">
-        <ion-avatar item-start>
-            <img [src]="item.icon">
-          </ion-avatar>
-          <h2>{{ item.name }}</h2>
-          <p> {{ p(item) }}</p>
-          <ion-badge color="danger" *ngIf="item.unread" item-end>{{item.unread}}</ion-badge>
-        </ion-item>
-        <ion-item-options side="right">
+          <ion-item (click)="clickItem(item)">
+            <ion-avatar item-start>
+              <img [src]="item.icon">
+            </ion-avatar>
+            <h2>{{ item.name }}</h2>
+            <p> {{ p(item) }}</p>
+            <ion-badge color="danger" *ngIf="item.unread" item-end>{{item.unread}}</ion-badge>
+          </ion-item>
+          <ion-item-options side="right">
             <button ion-button (click)="delete(item);itemSliding.close()">
                 <ion-icon name="trash"></ion-icon>
                 DELETE
