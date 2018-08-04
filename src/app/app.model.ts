@@ -1,3 +1,4 @@
+
 export class BaseBean {
   createdAt: number
   updatedAt: number
@@ -192,6 +193,12 @@ export class Message {
   localTime: number
   state: number // 消息状态，0 完成，1 发送中，2 失败
 
+  tid(myId:String): string{
+    if(this.targetId === myId){
+      return `${this.senderId}#${this.targetType}`
+    }
+    return `${this.targetId}#${this.targetType}`
+  }
 
   constructor(opt?: any){
     this.id = opt && opt.id || 0
