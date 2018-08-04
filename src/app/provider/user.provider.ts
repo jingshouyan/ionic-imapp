@@ -107,7 +107,7 @@ export class UserProvider {
   getUserCache(id: string): Observable<User>{
     return this.getUserMap([id])
     .map(userMap => {
-      return userMap[id]
+      return userMap[id] || new User
     })
   }
 
@@ -165,7 +165,7 @@ export class UserProvider {
     const endpoint = "user/GetUser.json"  
     return this.api.post(endpoint,{ids: [id]})
     .map(rsp =>{
-      let user: User = undefined
+      let user: User = new User
       if(rsp.code === 0 && rsp.data.length > 0){
         user = new User(rsp.data[0])
         this.cache(user)

@@ -5,6 +5,7 @@ import { ContactProvider } from '../../app/provider/contact.provider';
 import { UserProvider } from '../../app/provider/user.provider';
 import { Thread } from './../../app/app.model';
 import { ChatPage } from './../chat/chat';
+import { UserInfoProvoider } from '../../app/provider/userInfo.provider';
 
 /**
  * Generated class for the UserPage page.
@@ -27,25 +28,17 @@ export class UserPage {
     public navParams: NavParams,
     public contact: ContactProvider,
     public user: UserProvider,
+    public uinfo: UserInfoProvoider,
   ) {
 
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad UserPage');
-    this.userInfo = new UserInfo(this.navParams.data)
-    console.log(this.userInfo)
-    let c = this.contact.getContact(this.userInfo.id)
-    console.log(this.userInfo)
-    if(c){
-      this.userInfo.remark = c.remark
-      this.userInfo.isContact = true
-      console.log(this.userInfo)
-    }
-    this.user.getUser(this.userInfo.id)
-    .subscribe(user => {
-      this.userInfo = new UserInfo(Object.assign({},this.userInfo,user));
-    })
+    this.userInfo = new UserInfo(this.navParams.data);
+    this.userInfo.isContact =true;
+    this.uinfo.getUserInfo(this.userInfo.id,{netFirst: true})
+    .subscribe(u => this.userInfo = u);
   }
 
   addContact($event){

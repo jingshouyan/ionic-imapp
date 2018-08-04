@@ -26,6 +26,7 @@ import { SearchPage } from '../pages/search/search';
 import { UserPage } from '../pages/user/user';
 import { ThreadPage } from '../pages/thread/thread';
 import { ThreadProvider } from './provider/thread.provider';
+import { UserInfoProvoider } from './provider/userInfo.provider';
 
 
 @NgModule({
@@ -73,6 +74,7 @@ import { ThreadProvider } from './provider/thread.provider';
     SocketProvider,
     MessageProvider,
     ThreadProvider,
+    UserInfoProvoider,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     {provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
   ]

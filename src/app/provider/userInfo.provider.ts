@@ -1,0 +1,24 @@
+import { Injectable } from "@angular/core";
+import { UserProvider } from "./user.provider";
+import { ContactProvider } from "./contact.provider";
+import { UserInfo } from "../app.model";
+
+@Injectable()
+export class UserInfoProvoider {
+
+  constructor(
+    private user: UserProvider,
+    private contact: ContactProvider,
+  ){
+
+  }
+
+  getUserInfo(id: string,opt: any = {netFirst: false}){
+    let obs = opt.netFirst ? this.user.getUser(id) : this.user.getUserCache(id);
+    return obs
+    .map(user =>{
+      let contact = this.contact.contactMap[id] || { isContact: false };
+      return new UserInfo(Object.assign({isContact: true},contact,user));
+    })
+  }
+}
