@@ -138,6 +138,7 @@ export class Contact extends BaseBean{
   remark: string
   type: number
   revision: number
+  _db: boolean
 
   avatar(){
     return this.icon || "assets/imgs/avatar.jpg"
@@ -152,6 +153,7 @@ export class Contact extends BaseBean{
     this.userType = opt && opt.userType || 1   
     this.type = opt && opt.type || 1
     this.revision = opt && opt.revision || 0
+    this._db = opt && !!opt._db
   }
 }
 

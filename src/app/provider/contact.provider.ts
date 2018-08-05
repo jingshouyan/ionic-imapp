@@ -1,36 +1,70 @@
 import { Injectable } from '@angular/core';
-import { Subject, BehaviorSubject } from 'rxjs/Rx';
+import { Subject, BehaviorSubject, Observable } from 'rxjs/Rx';
 import { Contact } from '../app.model';
 import { DbProvider, TABLES } from './db.provider';
 import { TokenProvider } from './token.provider';
 import { ApiProvider } from './api.provider';
+import _ from 'underscore';
 
+interface IContactOpt extends Function {
+  (cMap: {[id: string]: Contact}): {[id: string]: Contact};
+}
 @Injectable()
 export class ContactProvider {
 
+  newContact: Subject<Contact> = new Subject();
+  contactMap: Observable<{[id: string]: Contact}>;
+  contactUpates: Subject<IContactOpt> = new Subject();
+  contacts: Subject<Contact[]> = new Subject();
+
+
   currentContacts: Subject<Contact[]> = new BehaviorSubject<Contact[]>([])
   contactChange: Subject<Contact> = new Subject<Contact>()
-  contactMap: {[id: string]: Contact} = {}
-  revision: number = 0
+  _contactMap: {[id: string]: Contact} = {}
+  revision: number = 0;
   constructor(
     private api: ApiProvider,
     private db: DbProvider,
     token: TokenProvider,
   ){
-    token.currentToken.subscribe(token =>{
-      if(token && token.usable()){
-        this.loadData()
-      }
-    })
+
+    //当 token 变化时，推送清除数据操作到 threadUpdates
+    token.currentToken.filter(t => {
+      return t && t.usable();
+    }).map((): IContactOpt => {
+      return (map:{[id: string]: Contact}) => {
+        return {};
+      };
+    }).subscribe(this.contactUpates);
+
+
+    //当 token 变化时，加载数据库数据
+    token.currentToken
+    .filter(t => t && t.usable())
+    .subscribe(() =>{
+      this.revision = 0;
+      this.db.list(TABLES.Contact)
+      .subscribe(rows =>{
+        _.chain(rows).forEach(row => {
+          let contact = new Contact(row)
+          if(contact.revision > this.revision){
+            this.revision = contact.revision
+          }
+          contact._db = true;
+          this.newContact.next(contact);
+        });
+                
+      });
+    });
   }
 
   loadData(){
-    this.contactMap = {}    
+    this._contactMap = {}    
     this.db.list(TABLES.Contact)
     .subscribe(rows =>{
       rows.forEach(row => {
         let contact = new Contact(row)
-        this.contactMap[contact.id] = contact
+        this._contactMap[contact.id] = contact
         this.contactChange.next(contact)
         if(contact.revision > this.revision){
           this.revision = contact.revision
@@ -44,8 +78,8 @@ export class ContactProvider {
 
   private pushContacts(){
     let contacts: Contact[] = []
-    for(let id in this.contactMap){
-      let contact = this.contactMap[id]
+    for(let id in this._contactMap){
+      let contact = this._contactMap[id]
       if(contact.deletedAt<0){
         contacts.push(contact)
       }
@@ -62,7 +96,7 @@ export class ContactProvider {
           let contact = new Contact(row)
           this.contactChange.next(contact)
           this.db.replace(contact,TABLES.Contact)
-          this.contactMap[contact.id] = contact
+          this._contactMap[contact.id] = contact
           if(contact.revision > this.revision){
             this.revision = contact.revision
           }
@@ -79,7 +113,7 @@ export class ContactProvider {
   }
 
   getContact(id: string): Contact{
-    let contact = this.contactMap[id]
+    let contact = this._contactMap[id]
     if(contact && !contact.deleted()){
       return contact
     }

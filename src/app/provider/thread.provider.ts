@@ -28,8 +28,6 @@ export class ThreadProvider {
     private db :DbProvider,
     token: TokenProvider,
     private message: MessageProvider,
-    contact: ContactProvider,
-    user: UserProvider,
   ){
 
     // update 流 计算得到 threadMap
