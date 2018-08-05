@@ -164,6 +164,7 @@ export class Thread extends BaseBean {
   targetId: string
   targetType: string
   draft: string
+  _messages: Message[]
 
   avatar(){
     return this.icon || "assets/imgs/avatar.jpg"
@@ -182,6 +183,7 @@ export class Thread extends BaseBean {
     this.targetId = opt && opt.targetId || ''
     this.targetType = opt && opt.targetType || ''
     this.draft = opt && opt.draft || ''
+    this._messages = opt && opt._messages || []
     if(this.targetId && this.targetType){
       this.id = Thread.tid(this.targetId,this.targetType)
     }

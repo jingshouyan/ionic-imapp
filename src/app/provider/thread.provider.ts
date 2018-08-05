@@ -11,6 +11,7 @@ import _ from 'underscore';
 export class ThreadProvider {
 
   private threadCache: {[id: string]: Thread} = {}
+  private threadMessageCache:{[id: string]: Message[]} = {}
   currentThreads: Subject<Thread[]> = new BehaviorSubject<Thread[]>([])
   private token : Token = new Token;
 
@@ -107,6 +108,15 @@ export class ThreadProvider {
       }
     })
 
+  }
+
+  getMessages(tid: string){
+    let messages = this.threadMessageCache[tid];
+    if(!messages){
+      messages = [];
+      this.threadMessageCache[tid] = messages;
+    } 
+    return messages;
   }
 
 

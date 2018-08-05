@@ -131,7 +131,7 @@ export class DbProvider {
     let fields = '';
     for (let f in object) {
       let fv = object[f]
-      if(typeof fv === 'function') continue
+      if(typeof fv === 'function'|| f.startsWith("_")) continue
       fields += f + ',';
     }
     fields = fields.substr(0, fields.length - 1);
@@ -142,7 +142,7 @@ export class DbProvider {
     let fields = '';
     for (let f in object) {
       let fv = object[f]
-      if(typeof fv === 'function') continue
+      if(typeof fv === 'function'|| f.startsWith("_")) continue
       fields += '?,';
     }
     fields = fields.substr(0, fields.length - 1);
@@ -153,7 +153,7 @@ export class DbProvider {
     let fields = [];
     for (let f in object) {
       let fv = object[f]
-      if(typeof fv === 'function') continue
+      if(typeof fv === 'function'|| f.startsWith("_")) continue
       fields.push(object[f]);
     }
     return fields;
@@ -168,7 +168,7 @@ export class DbProvider {
     let fields = '';
     for (let f in object) {
       let fv = object[f]
-      if(typeof fv === 'function') continue
+      if(typeof fv === 'function'|| f.startsWith("_")) continue
       if (f !== "id") fields += f + "=? ,";
     }
     fields = fields.substr(0, fields.length - 1);

@@ -28,7 +28,7 @@ export class ChatPage {
   scoll: Content
 
 
-  thread: Thread
+  thread: Thread;
 
   messages: Message[] = [];
 
@@ -46,7 +46,7 @@ export class ChatPage {
   ) {
     let t = new Thread(navParams.data)
     this.thread = threadProvider.getThread(t);
-      this.pull(true);
+    this.pull(true);
     threadProvider.threadMessage(this.thread.id)
     .subscribe(message =>{
       this.uInfo(message.senderId);
@@ -112,6 +112,9 @@ export class ChatPage {
   }
 
   sendTextMessage(){
+    if(!this.thread.draft){
+      return false;
+    }
     let message = new Message({
       targetId:this.thread.targetId,
       targetType: this.thread.targetType,
@@ -128,6 +131,7 @@ export class ChatPage {
     let dim = this.scoll.getContentDimensions();
     console.log(dim);
     this.scoll.scrollTo(0,dim.scrollHeight);
+    // this.scoll.scrollToBottom();
   }
 
   onMessageScroll(){
