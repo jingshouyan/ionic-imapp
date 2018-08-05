@@ -1,5 +1,5 @@
-import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { IonicPage, NavController, NavParams, TextInput } from 'ionic-angular';
+import { Component, ViewChild } from '@angular/core';
+import { IonicPage, NavController, NavParams, TextInput, Content } from 'ionic-angular';
 import { Message, Thread } from '../../app/app.model';
 import { MessageProvider } from './../../app/provider/message.provider';
 import { ThreadProvider } from '../../app/provider/thread.provider';
@@ -7,7 +7,7 @@ import { Observable } from 'rxjs/Rx';
 import { TokenProvider } from '../../app/provider/token.provider';
 import { UserInfo } from './../../app/app.model';
 import { UserInfoProvoider } from './../../app/provider/userInfo.provider';
-
+import _ from 'underscore';
 /**
  * Generated class for the ChatPage page.
  *
@@ -24,6 +24,9 @@ export class ChatPage {
 
   @ViewChild("textInput")
   textInput: TextInput
+  @ViewChild("scoll")
+  scoll: Content
+
 
   thread: Thread
 
@@ -43,11 +46,12 @@ export class ChatPage {
   ) {
     let t = new Thread(navParams.data)
     this.thread = threadProvider.getThread(t);
-    this.pull();
+      this.pull(true);
     threadProvider.threadMessage(this.thread.id)
     .subscribe(message =>{
       this.uInfo(message.senderId);
       this.messages.push(message);
+      this.onMessageScroll();
     });
     tokenProvider.currentToken.subscribe(t =>{
       if(t && t.usable){
@@ -71,7 +75,7 @@ export class ChatPage {
 
  
 
-  ionViewDidLoad() {
+  ionViewDidLoad() {    
     Observable.fromEvent(this.textInput.getNativeElement(),"keyup")
     .map((e:any) => e.target.value)
     .debounceTime(300)
@@ -80,17 +84,26 @@ export class ChatPage {
     })
   }
 
+  ionViewWillEnter(){
+    this.scrollToBottom();
+  }
 
 
-  pull(){
-    let timestamp = new Date().getTime();
+  pull(first:boolean = false){
+
+    let timestamp = new Date().getTime()+ 24*60*60*1000;
     if(this.messages.length>0){
-      timestamp = this.messages[0].sentAt;
+      timestamp = this.messages[0].sentAt ;
     }
     this.threadProvider.pullMessage(this.thread.id,timestamp)
-    .subscribe(message =>{
-      this.uInfo(message.senderId);
-      this.messages.unshift(message);
+    .subscribe(messages =>{
+      _.chain(messages).forEach(message =>{
+        this.uInfo(message.senderId);
+        this.messages.unshift(message);
+      })
+      if(first){
+          this.scrollToBottom();
+      }
     });
   }
 
@@ -106,7 +119,26 @@ export class ChatPage {
       text: {content: this.thread.draft}
     })
     this.thread.draft = ""
-    this.messageProvider.send(message).subscribe(rsp => {})
+    this.messageProvider.send(message).subscribe(rsp => {
+      this.scrollToBottom();
+    })
+  }
+
+  scrollToBottom(): void {
+    let dim = this.scoll.getContentDimensions();
+    console.log(dim);
+    this.scoll.scrollTo(0,dim.scrollHeight);
+  }
+
+  onMessageScroll(){
+    let dim = this.scoll.getContentDimensions();
+    let scrollHeight = dim.scrollHeight;
+    let scrollTop = dim.scrollTop;
+    let contentHeight = dim.contentHeight;
+    console.log(dim);
+    if(scrollHeight-(scrollTop+contentHeight)<100){
+      this.scrollToBottom();
+    }
   }
 
 }

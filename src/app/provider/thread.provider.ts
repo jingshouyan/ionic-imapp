@@ -150,6 +150,7 @@ export class ThreadProvider {
 
 
   private loadData(){
+    this.threadCache = {};
     return this.db.list(TABLES.Thread).then(rows =>{
       rows.forEach(row =>{
         let thread = new Thread(row)
@@ -178,16 +179,14 @@ export class ThreadProvider {
     return this.message.newMessage.filter(message => message.threadId == tid)
   }
 
-  pullMessage(tid:string,timestamp: number ,size: number = 100): Observable<Message>{
-    let pull: Subject<Message> = new Subject<Message>()
-    this.db.list(TABLES.Msg,"threadId = ? and sentAt < ? order by sentAt desc limit 0, ?",[tid,timestamp,size])
-    .then(rows =>{
-      _.chain(rows).forEach(row =>{
-        let message = Message.load(row);
-        pull.next(message);
-      });
-    });
-    return pull;
+  pullMessage(tid:string,timestamp: number ,size: number = 100): Observable<Message[]>{
+    let obs = Observable.fromPromise(
+      this.db.list(TABLES.Msg,"threadId = ? and sentAt < ? order by sentAt desc limit 0, ?",[tid,timestamp,size])
+    ).map(rows => {
+      let messages = _.chain(rows).map(row => Message.load(row)).value();
+      return messages;
+    })
+    return obs;
   }
 
 

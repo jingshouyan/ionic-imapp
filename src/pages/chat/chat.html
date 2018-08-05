@@ -11,46 +11,44 @@
   </ion-navbar>
 
 </ion-header>
-<ion-content>
-  <!-- <ion-list no-lines>
-    <ion-card *ngFor="let message of messages" no-lines>
-        <ion-item >
-            <ion-avatar item-start>
-                <img [src]="uInfoMap[message.senderId].avatar()">
-                <p> {{ (uInfoMap[message.senderId])?.name() }} </p>
-            </ion-avatar>        
-        </ion-item>
-        <ion-card-content>
-          <p>{{ message.text.content }}</p>
-        </ion-card-content>
+<ion-content #scoll>
+  <ion-list no-lines>
+    <div *ngFor="let message of messages">
+        <ion-card>
+      <ion-item *ngIf="me(message)">
+          <ion-note item-start>{{message.sentAt | date:'HH:mm:ss'| lowercase}}</ion-note>
+          <h2 item-content>{{ message.text.content }} </h2> 
+          <ion-avatar  item-end>
+              <img [src]="uInfoMap[message.senderId].avatar()">
+          </ion-avatar>  
+      </ion-item> 
+      <ion-item *ngIf="!me(message)">
+          <ion-avatar  item-start>
+              <img [src]="uInfoMap[message.senderId].avatar()">
+          </ion-avatar>
+          <p> {{ (uInfoMap[message.senderId])?.name() }} </p>
+          <h2 item-text-wrap>{{ message.text.content }} </h2>    
+          <ion-note item-end>{{message.sentAt | date:'HH:mm:ss'| lowercase}}</ion-note>
+      </ion-item>
     </ion-card>
-    
-  </ion-list> -->
+    </div>
 
-  <ion-grid>
-      <ion-row *ngFor="let message of messages">
-        <ion-col col-3>
-            <ion-item >
-                <ion-avatar item-start>
-                    <img [src]="uInfoMap[message.senderId].avatar()">
-                    <p> {{ (uInfoMap[message.senderId])?.name() }} </p>
-                </ion-avatar>        
-            </ion-item>
-        </ion-col>
-        <ion-col col-8>
-            <p>{{ message.text.content }}</p>
-          </ion-col>
-      </ion-row>
-    </ion-grid>
+        <!-- <ion-card-content>
+          <p>{{ message.text.content }}</p>
+        </ion-card-content> -->
+    
+  </ion-list>
+
+
 
 </ion-content>
 <ion-footer>
   <ion-navbar>
   <ion-item>
-    <ion-input [(ngModel)]="thread.draft" #textInput></ion-input>
+    <ion-input [(ngModel)]="thread.draft" #textInput (keydown.enter)="sendTextMessage()"></ion-input>
   </ion-item>
   <ion-buttons end>
-      <button ion-button (click)="sendTextMessage()">
+      <button ion-button (click)="sendTextMessage()" [disabled]="!thread.draft">
         发送
       </button>
     </ion-buttons>
