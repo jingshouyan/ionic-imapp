@@ -27,7 +27,7 @@ export class ContactProvider {
   loadData(){
     this.contactMap = {}    
     this.db.list(TABLES.Contact)
-    .then(rows =>{
+    .subscribe(rows =>{
       rows.forEach(row => {
         let contact = new Contact(row)
         this.contactMap[contact.id] = contact
@@ -37,12 +37,9 @@ export class ContactProvider {
         }
       })
       this.pushContacts()
-      return this.revision
-    })
-    .then(revision => {
-      console.log("loaddata,version",revision)
       this.syncContacts()
     })
+
   }
 
   private pushContacts(){

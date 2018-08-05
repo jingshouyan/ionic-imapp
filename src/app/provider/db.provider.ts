@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { TokenProvider } from './token.provider';
 import { User, Thread, Contact, Msg } from '../app.model';
+import { Observable } from 'rxjs/Rx';
+import _ from 'underscore';
 const win: any = window;
 @Injectable()
 export class DbProvider {
@@ -59,9 +61,7 @@ export class DbProvider {
 
   private dropTable(table: TABLES) {
     this.query("DROP TABLE " + TABLES[table]
-    ).catch(err => {
-      console.error('Storage: Unable to create initial storage User table', err.tx, err.err);
-    });
+    ).subscribe(res =>{});
   }
 
   private createTable(table: TABLES,obj:any){
@@ -76,11 +76,7 @@ export class DbProvider {
     }
     sql = sql.substr(0, sql.length - 1);
     sql += ');'
-    console.log(sql)
-
-    this.query(sql).catch(err => {
-      console.error('Storage: Unable to create initial storage '+TABLES[table]+' table', err.tx, err.err);
-    })
+    this.query(sql).subscribe(res => {});
   }
 
   private dbType(obj){
@@ -91,39 +87,37 @@ export class DbProvider {
     }
   }
 
-  list(table: TABLES,condition: string = '1 = 1',params: any[] = []){
-    return this.query('SELECT * FROM ' + TABLES[table] + ' WHERE '+ condition,params).then(data => {
+  list(table: TABLES,condition: string = '1 = 1',params: any[] = []): Observable<any[]>{
+    return this.query('SELECT * FROM ' + TABLES[table] + ' WHERE '+ condition,params).map(data => {
+      let result = [];
       if (data.res.rows.length > 0) {
         console.log('Rows found.',data);
         if (this.platform.is('cordova') && win.sqlitePlugin) {
-          let result = [];
           for (let i = 0; i < data.res.rows.length; i++) {
             let row = data.res.rows.item(i);
             result.push(row);
           }
-          return result;
         }
         else {
-          let result = [];
           for (let i = 0; i < data.res.rows.length; i++) {
             let row = data.res.rows[i];
             result.push(row);
           }
-          return result;
         }
       }
-      return []
+      console.info("query result:",result);
+      return result;
     });
   }
 
  
-  insert(newObject, table: TABLES): Promise<any> {
+  insert(newObject, table: TABLES): Observable<any> {
     return this.query('INSERT INTO ' + TABLES[table] + ' (' + this.getFieldNamesStr(newObject)
       + ') VALUES (' + this.getQ(newObject) + ")", this.getFieldValues(newObject));
   }
 
-  replace(newObject, table: TABLES): Promise<any> {
-    this.delete(table,newObject)
+  replace(newObject, table: TABLES): Observable<any> {
+    this.delete(table,newObject).subscribe(res =>{});
     return this.insert(newObject,table)
   }
 
@@ -159,7 +153,7 @@ export class DbProvider {
     return fields;
   }
 
-  update(object, table: TABLES): Promise<any> {
+  update(object, table: TABLES): Observable<any> {
     return this.query('UPDATE ' + TABLES[table] + ' SET ' + this.getFieldSetNamesStr(object) + ' WHERE id=?',
       this.getFieldValuesArray(object));
   }
@@ -186,23 +180,22 @@ export class DbProvider {
     return fields;
   }
 
-  delete(table: TABLES, object): Promise<any> {
+  delete(table: TABLES, object): Observable<any> {
     let query = "DELETE FROM " + TABLES[table] + " WHERE id=?";
     return this.query(query, [object.id]);
   }
 
-  find(table: TABLES, id): Promise<any> {
-    let query = "SELECT * FROM " + TABLES[table] + " WHERE id=?";
-    return this.query(query, [id]).then(value =>{
-      return value.res.rows[0]
+  find(table: TABLES, id): Observable<any> {
+    return this.list(table,"id = ?",[id]).map(rows =>{
+      return _.chain(rows).first();
     });
   }
 
-  query(query: string, params: any[] = []): Promise<any> {
-    return new Promise((resolve, reject) => {
+  query(query: string, params: any[] = []): Observable<any> {
+    let promise =  new Promise((resolve, reject) => {
       try {
         this._dbPromise.then(db => {
-          console.log("query ...")
+          console.log("query : "+query)
           db.transaction((tx: any) => {
               tx.executeSql(query, params,
                 (tx: any, res: any) => resolve({tx: tx, res: res}),
@@ -213,6 +206,10 @@ export class DbProvider {
       } catch (err) {
         reject({err: err});
       }
+    });
+    return Observable.fromPromise(promise).catch(err => {
+      console.warn("db query error",err.tx,err.err)
+      return err;
     });
   }
 }

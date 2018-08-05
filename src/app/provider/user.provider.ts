@@ -60,19 +60,17 @@ export class UserProvider {
 
   loadData(){
     this.db.find(TABLES.User,this.token.userId)
-    .then(value => {
+    .subscribe(value => {
       console.log("db user",value)
       this.currentUser.next(new User(value))
-    })
-    .then(value =>{
+
       const endpoint = "user/Me.json"    
       this.api.post(endpoint,{})
       .subscribe(rsp =>{
         if(rsp.code ===0 && rsp.data){
           let user = new User(rsp.data)
           this.db.replace(user,TABLES.User)
-          .then(() => this.currentUser.next(user))
-          .catch(e => console.log(e))
+          .subscribe(() => this.currentUser.next(user))
         }
       })
     })    
@@ -129,7 +127,7 @@ export class UserProvider {
     }
     else{
       this.db.list(TABLES.User,"id in (?)",[idNoCache])
-      .then(rows => {
+      .subscribe(rows => {
         rows.forEach(row =>{
           let user = new User(row)
           users[user.id] = user
@@ -175,7 +173,7 @@ export class UserProvider {
       }
       else{
         this.db.list(TABLES.User,"id in (?)",[idNoCache])
-        .then(rows => {
+        .subscribe(rows => {
           rows.forEach(row =>{
             let user = new User(row)
             users[user.id] = user

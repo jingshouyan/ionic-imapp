@@ -7,6 +7,10 @@ import { Subject, BehaviorSubject, Observable } from 'rxjs/Rx';
 import { ContactProvider } from "./contact.provider";
 import { UserProvider } from './user.provider';
 import _ from 'underscore';
+
+interface IThreadOpt extends Function {
+  (messages: {[id: string]: Thread}): {[id: string]: Thread};
+}
 @Injectable()
 export class ThreadProvider {
 
@@ -15,6 +19,10 @@ export class ThreadProvider {
   currentThreads: Subject<Thread[]> = new BehaviorSubject<Thread[]>([])
   private token : Token = new Token;
 
+  newThread: Subject<Thread> = new Subject();
+  threadMap: Observable<{[id: string]: Thread}>;
+  threadUpdates: Subject<IThreadOpt> = new Subject();
+  threads: Subject<Thread[]> = new Subject();
 
   constructor(
     private db :DbProvider,
@@ -23,11 +31,95 @@ export class ThreadProvider {
     contact: ContactProvider,
     user: UserProvider,
   ){
+    let _this = this;
+
+    this.threadMap = this.threadUpdates
+    .scan((tMap:{[id: string]: Thread},opt: IThreadOpt) =>{
+      return opt(tMap);
+    },{}).publishReplay(1).refCount();
+
+    this.threadMap.map(tMap => {
+      return _.map(tMap,t=>t)
+      .sort((a,b) => b.latestTime - a.latestTime);      
+    }).subscribe(this.threads);
+
+    //当 token 变化时，推送清除数据操作到 threadUpdates
+    token.currentToken.filter(t => {
+      return t && t.usable();
+    }).map(function(t): IThreadOpt {
+      return (map:{[id: string]: Thread}) => {
+        return {};
+      };
+    }).subscribe(this.threadUpdates);
+
+    //newThread 流 推送到 threadUPdates
+    this.newThread.map(function(t): IThreadOpt {
+      return (map:{[id: string]: Thread}) => {
+        let thread = map[t.id];
+        if(thread) {
+          if(!t.unread) {
+            t.unread = t.unread + thread.unread;
+          }
+          if(!t.draft && thread.draft) {
+            t.draft = thread.draft;
+          }
+          if(t.latestTime < thread.latestTime){
+            t.latestTime = thread.latestTime;
+          }
+          if(!t.latestMessage && thread.latestMessage){
+            t.latestMessage = thread.latestMessage;
+          }
+        }
+        if(!t._db){
+          //不是从数据库中读取的需要存储到数据库中
+          _this.db.replace(t,TABLES.Thread)
+          .subscribe((res) =>{});
+        }
+        map[t.id] = t;
+        map = Object.assign({},map);
+        return map;
+      };
+    }).subscribe(this.threadUpdates);
+
+    token.currentToken.filter(t => {
+      return t && t.usable();
+    }).subscribe(t => {
+
+      //从数据库中读取 thread 推送到 newThread
+      this.db.list(TABLES.Thread).flatMap(rows => {
+        return Observable.from(rows);
+      })
+      .map(row => {
+        let t = new Thread(row);
+        t._db = true;
+        return t;
+      })
+      .subscribe(this.newThread);
+
+      //消息流推送到 newThread
+      this.message.newMessage.map(message => {
+        let targetId = message.targetId == t.userId ? message.senderId : message.targetId;
+        let unread = message.targetId == t.userId ? 1: 0;
+        let msgCtx = this.msgCtx(message);
+        let thread = new Thread({
+          latestMessage: msgCtx,
+          latestTime: message.sentAt,
+          targetId: targetId,
+          targetType: message.targetType,
+          unread: unread,
+        });
+        console.info("new message to new thread",message,thread);
+        return thread;
+      }).subscribe(this.newThread);
+
+    });
+
+
     token.currentToken.subscribe(token =>{
       if(token && token.usable()){
         this.token = token;
-        this.loadData()
-        .then(v =>{
+        this.loadData();
+        
           console.log("thread provider inited")
           //订阅新消息
           message.newMessage.subscribe(msg =>{
@@ -104,7 +196,7 @@ export class ThreadProvider {
             }
           })
 
-        })        
+       
       }
     })
 
@@ -140,7 +232,7 @@ export class ThreadProvider {
 
   pushThread(thread: Thread){
     this.threadCache[thread.id] = thread
-    this.db.replace(thread,TABLES.Thread)
+    this.db.replace(thread,TABLES.Thread).subscribe(res => {});
     this.nextThreads()
   }
 
@@ -161,7 +253,7 @@ export class ThreadProvider {
 
   private loadData(){
     this.threadCache = {};
-    return this.db.list(TABLES.Thread).then(rows =>{
+    return this.db.list(TABLES.Thread).subscribe(rows =>{
       rows.forEach(row =>{
         let thread = new Thread(row)
         this.threadCache[thread.id] = thread
@@ -171,8 +263,8 @@ export class ThreadProvider {
   }
 
   delThread(thread: Thread){
-    delete this.threadCache[thread.id]
-    this.db.delete(TABLES.Thread,thread)
+    delete this.threadCache[thread.id];
+    this.db.delete(TABLES.Thread,thread).subscribe(res => {})
     this.nextThreads()
   }
 
@@ -190,9 +282,8 @@ export class ThreadProvider {
   }
 
   pullMessage(tid:string,timestamp: number ,size: number = 100): Observable<Message[]>{
-    let obs = Observable.fromPromise(
-      this.db.list(TABLES.Msg,"threadId = ? and sentAt < ? order by sentAt desc limit 0, ?",[tid,timestamp,size])
-    ).map(rows => {
+    let obs = this.db.list(TABLES.Msg,"threadId = ? and sentAt < ? order by sentAt desc limit 0, ?",[tid,timestamp,size])
+    .map(rows => {
       let messages = _.chain(rows).map(row => Message.load(row)).value();
       return messages;
     })
