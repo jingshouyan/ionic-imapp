@@ -15,7 +15,8 @@ export class UserProvider {
 
   newUser: Subject<User> = new Subject();
   userUpdates: Subject<IUserOpt> = new Subject();
-  userMap: Observable<{[id: string]: User}>
+  userMap: Observable<{[id: string]: User}>;
+  _userMap: {[id: string]: User} = {};
 
 
   currentUser: Subject<User> = new BehaviorSubject<User>(new User)
@@ -35,6 +36,9 @@ export class UserProvider {
     .scan((uMap: {[id: string]: User},opt: IUserOpt) => {
       return opt(uMap);
     },{}).publishReplay(1).refCount();
+
+    // 暂时先把 map 放出来
+    this.userMap.subscribe(map => this._userMap = map);
 
     //新用户流 导入 更新留
     this.newUser.map((u): IUserOpt =>{
@@ -69,45 +73,25 @@ export class UserProvider {
    }
 
    uMap(ids: string[]){
-     let obs: Subject<{[id: string]: User}> = new Subject();
      let noCache: string[] = [];
-     let db = false;
-     let ajax = false;
-     this.userMap.flatMap(uMap => {
-       if(!db) {
-         db = true;
-         _.chain(ids).forEach( id => {
-          let u = uMap[id];
-          u || noCache.push(id);
-         });
-         console.info("nocache",noCache);
-         if(noCache.length > 0){
-          return this.db.list(TABLES.User,"id in (?)",[noCache])
-          .map(rows =>{
-            _.chain(rows).forEach(row => {
-              let u = new User(row);
-              u._db = true;
-              uMap[u.id] = u;
-              this.newUser.next(u);
-              noCache = noCache.filter(id => id == u.id);
-            });
-            return uMap;
-          });
-         } else {
-          return Observable.of(uMap);
-         }
-       } else {
-        return Observable.of(uMap);
-       } 
-     }).flatMap(uMap =>{
-        console.info("nocache",noCache);
-        if(!ajax && noCache.length > 0){
-          return this.getUsers(noCache);
-        } else {
-          return Observable.of(uMap);
-        }
-     }).subscribe(obs).unsubscribe();
-     return obs;
+     _.chain(ids).forEach(id =>{
+      this._userMap[id] || noCache.push(id);
+     });
+     if(noCache.length > 0){
+      this.db.list(TABLES.User,"id in (?)",[noCache])
+      .subscribe(rows => {
+       _.chain(rows).forEach(row => {
+         let u = new User(row);
+         u._db = true;
+         this.newUser.next(u);
+         noCache = noCache.filter(id => u.id == id);
+       });
+       if(noCache.length > 0){
+         this.getUsers(noCache).subscribe();
+       }
+      });
+     }
+     return this.userMap;
    }
 
   // 通过网络获取多个用户信息，并将每一个用户发输出到 newUser
@@ -126,24 +110,17 @@ export class UserProvider {
       }
     });
   }
-  //通过网络获取单个用户信息
+  //通过网络获取单个用户信息, 10 秒内数据为有效数据
   getUser(id: string): Observable<User>{
-    let userSub = new Subject<User>()
-    let user = this.userCache[id]
-    if(user && user.loadTime() < 5000){
-      userSub.next(user)
-      return userSub
+    let sub = new Subject<User>();
+    let user = this._userMap[id]
+    sub.next(user || new User)
+    if(user && user.loadTime() > 10000){
+      this.getUsers([id]).subscribe(uMap =>{
+        sub.next(uMap[id] || new User);
+      })
     }
-    const endpoint = "user/GetUser.json"  
-    return this.api.post(endpoint,{ids: [id]})
-    .map(rsp =>{
-      let user: User = new User
-      if(rsp.code === 0 && rsp.data.length > 0){
-        user = new User(rsp.data[0])
-        this.cache(user)
-      }
-      return user
-    })
+    return sub;
   }
 
   login(login:Login){
