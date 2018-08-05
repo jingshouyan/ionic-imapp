@@ -31,7 +31,6 @@ export class ThreadPage {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad ThreadPage');
   }
 
   delete(thread: Thread){

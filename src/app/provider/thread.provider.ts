@@ -9,7 +9,7 @@ import { UserProvider } from './user.provider';
 import _ from 'underscore';
 
 interface IThreadOpt extends Function {
-  (messages: {[id: string]: Thread}): {[id: string]: Thread};
+  (tMap: {[id: string]: Thread}): {[id: string]: Thread};
 }
 @Injectable()
 export class ThreadProvider {
@@ -31,13 +31,14 @@ export class ThreadProvider {
     contact: ContactProvider,
     user: UserProvider,
   ){
-    let _this = this;
 
+    // update 流 计算得到 threadMap
     this.threadMap = this.threadUpdates
     .scan((tMap:{[id: string]: Thread},opt: IThreadOpt) =>{
       return opt(tMap);
     },{}).publishReplay(1).refCount();
 
+    // threadMap 流转换为 threads
     this.threadMap.map(tMap => {
       return _.map(tMap,t=>t)
       .sort((a,b) => b.latestTime - a.latestTime);      
@@ -46,18 +47,20 @@ export class ThreadProvider {
     //当 token 变化时，推送清除数据操作到 threadUpdates
     token.currentToken.filter(t => {
       return t && t.usable();
-    }).map(function(t): IThreadOpt {
+    }).map((): IThreadOpt => {
       return (map:{[id: string]: Thread}) => {
         return {};
       };
-    }).subscribe(this.threadUpdates);
+    })
+    .subscribe(opt =>this.threadUpdates.next(opt));
 
     //newThread 流 推送到 threadUPdates
-    this.newThread.map(function(t): IThreadOpt {
-      return (map:{[id: string]: Thread}) => {
+    this.newThread.map((t): IThreadOpt =>{
+      return (map:{[id: string]: Thread}) => {        
         let thread = map[t.id];
+        console.info("update ",map,t,thread);
         if(thread) {
-          if(!t.unread) {
+          if(t.unread) {
             t.unread = t.unread + thread.unread;
           }
           if(!t.draft && thread.draft) {
@@ -72,19 +75,21 @@ export class ThreadProvider {
         }
         if(!t._db){
           //不是从数据库中读取的需要存储到数据库中
-          _this.db.replace(t,TABLES.Thread)
+          this.db.replace(t,TABLES.Thread)
           .subscribe((res) =>{});
         }
         map[t.id] = t;
-        map = Object.assign({},map);
         return map;
       };
-    }).subscribe(this.threadUpdates);
+    })
+    .subscribe(opt =>this.threadUpdates.next(opt));
+
+
 
     token.currentToken.filter(t => {
       return t && t.usable();
     }).subscribe(t => {
-
+      this.token = t;
       //从数据库中读取 thread 推送到 newThread
       this.db.list(TABLES.Thread).flatMap(rows => {
         return Observable.from(rows);
@@ -94,111 +99,28 @@ export class ThreadProvider {
         t._db = true;
         return t;
       })
-      .subscribe(this.newThread);
-
-      //消息流推送到 newThread
-      this.message.newMessage.map(message => {
-        let targetId = message.targetId == t.userId ? message.senderId : message.targetId;
-        let unread = message.targetId == t.userId ? 1: 0;
-        let msgCtx = this.msgCtx(message);
-        let thread = new Thread({
-          latestMessage: msgCtx,
-          latestTime: message.sentAt,
-          targetId: targetId,
-          targetType: message.targetType,
-          unread: unread,
-        });
-        console.info("new message to new thread",message,thread);
-        return thread;
-      }).subscribe(this.newThread);
-
+      .subscribe(t => this.newThread.next(t));
     });
 
-
-    token.currentToken.subscribe(token =>{
-      if(token && token.usable()){
-        this.token = token;
-        this.loadData();
-        
-          console.log("thread provider inited")
-          //订阅新消息
-          message.newMessage.subscribe(msg =>{
-            console.log("thread on message",msg)
-            let targetId = msg.targetId
-            let targetType = msg.targetType
-            //单聊 以对方为 目标
-            if(targetType == 'user' && targetId == token.userId){
-              targetId = msg.senderId
-            }
-            let msgCtx = this.msgCtx(msg)
-            let tid = msg.threadId
-            let t = this.threadCache[tid]
-            //获取缓存会话信息
-            if(t){
-              msgCtx && (t.latestTime = msg.localTime)
-              msgCtx && (t.latestMessage = msgCtx)
-              t.unread = (msg.senderId != token.userId) && (t.unread + 1) || 0
-              this.pushThread(t)
-            }
-            else if(msgCtx) { //缓存中没有会话，并且信息需要展示
-              if(targetType == 'user'){
-                let c = contact.getContact(targetId)//取联系人信息
-                if(c){
-                  let thread = new Thread({
-                    name: c.nickname,
-                    remack: c.remark,
-                    icon: c.icon,
-                    latestMessage: msgCtx,
-                    latestTime: msg.localTime,
-                    targetId: targetId,
-                    targetType: targetType
-                  })
-                  thread.unread = (msg.senderId != token.userId) && (thread.unread + 1) || 0
-                  this.pushThread(thread)
-                }
-                else { //不再联系人中
-                  user.getUserCache(targetId)                  
-                  .subscribe(u =>{
-                    let thread = new Thread({
-                      name: u && u.nickname || targetId,
-                      icon: u && u.icon || '',
-                      latestMessage: msgCtx,
-                      latestTime: msg.localTime,
-                      targetId: targetId,
-                      targetType: targetType
-                    })
-                    thread.unread = (msg.senderId != token.userId) && (thread.unread + 1) || 0
-                    this.pushThread(thread)
-                  })
-                }
-              }
-            }
-          })
-
-          //订阅联系人变化
-          contact.contactChange.subscribe(c =>{
-            let tid = Thread.tid(c.id,"user")
-            let t = this.threadCache[tid]
-            if(t && !c.deleted &&(t.name != c.nickname || t.remark != c.remark)){
-              t.name = c.nickname
-              t.remark = c.remark
-              this.pushThread(t)
-            }
-          })
-
-          //订阅用户变化
-          user.cacheChange.subscribe(u =>{
-            let tid = Thread.tid(u.id,"user")
-            let t = this.threadCache[tid]
-            if(t && t.name != u.nickname){
-              t.name = u.nickname
-              this.pushThread(t)
-            }
-          })
-
-       
-      }
+    //消息流推送到 newThread
+    this.message.newMessage.map(message => {
+      let t = this.token;
+      let targetId = message.targetId == t.userId ? message.senderId : message.targetId;
+      let unread = message.targetId == t.userId ? 1: 0;
+      let msgCtx = this.msgCtx(message);
+      let thread = new Thread({
+        latestMessage: msgCtx,
+        latestTime: message.sentAt,
+        targetId: targetId,
+        targetType: message.targetType,
+        unread: unread,
+      });
+      console.info("new message to new thread",message,thread);
+      return thread;
     })
+    // TODO: 多个 subscribe(this.newTread) 只有一个生效，why ?
+    .subscribe(t => this.newThread.next(t));
+  
 
   }
 
@@ -251,16 +173,6 @@ export class ThreadProvider {
   } 
 
 
-  private loadData(){
-    this.threadCache = {};
-    return this.db.list(TABLES.Thread).subscribe(rows =>{
-      rows.forEach(row =>{
-        let thread = new Thread(row)
-        this.threadCache[thread.id] = thread
-      })
-      this.nextThreads()
-    })
-  }
 
   delThread(thread: Thread){
     delete this.threadCache[thread.id];

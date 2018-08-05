@@ -50,14 +50,12 @@ export class ContactProvider {
         contacts.push(contact)
       }
     }
-    console.log("push contacts",contacts)
     this.currentContacts.next(contacts)
   }
 
   private syncContacts(){
     this.listContact(this.revision)
     .subscribe(rsp => {
-      console.log(rsp)
       if(rsp.code === 0 && rsp.data.length > 0){
         rsp.data.forEach(row => {
           row["id"] = row["userId"]

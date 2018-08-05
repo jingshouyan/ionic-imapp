@@ -39,7 +39,6 @@ export class MessageProvider {
     socket.newMessage.subscribe(this.newMessage)
 
     this.newMessage.subscribe(message =>{
-      console.log(message)
       let msg = Msg.load(message)
       db.insert(msg,TABLES.Msg)
     })
@@ -59,7 +58,6 @@ export class MessageProvider {
 
 
   send(message: Message){
-    console.log(message)
     message.id = message.localId
     message.senderId = this.token.userId;
     message.threadId = message.tid(this.token.userId);

@@ -84,6 +84,7 @@ export class User extends BaseBean{
   nickname: string
   icon: string
   userType: number
+  _db: boolean
 
   avatar(){
     return this.icon || "assets/imgs/avatar.jpg"
@@ -95,7 +96,8 @@ export class User extends BaseBean{
     this.username = opt && opt.username || ''
     this.nickname = opt && opt.nickname || ''
     this.icon = opt && opt.icon || ''
-    this.userType = opt && opt.userType || 1    
+    this.userType = opt && opt.userType || 1   
+    this._db = opt && !!opt._db 
   }
 }
 
@@ -280,7 +282,6 @@ export class Msg {
       msg.data = JSON.stringify(opt[opt.messageType])
       msg.relatedUsers = opt.relatedUsers.join(',')
     }
-    console.log(msg)
     return msg
   }
 }

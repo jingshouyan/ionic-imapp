@@ -68,7 +68,6 @@ export class ChatPage {
       this.userInfoProvoider.getUserInfo(id)
       .subscribe(uinfo =>{
         this.uInfoMap[uinfo.id] = uinfo;
-        console.log(this.uInfoMap);
       });
     }
   }

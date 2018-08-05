@@ -5,6 +5,7 @@ import { MePage } from '../me/me';
 import { ThreadPage } from '../thread/thread';
 import { ThreadProvider } from '../../app/provider/thread.provider';
 import _ from 'underscore';
+import { UserProvider } from '../../app/provider/user.provider';
 
 @Component({
   templateUrl: 'tabs.html'
@@ -22,7 +23,10 @@ export class TabsPage {
     this.myTab,
   ];
 
-  constructor(thread: ThreadProvider) {
+  constructor(
+    thread: ThreadProvider,
+    user: UserProvider,
+  ) {
     thread.threads.map(ts => {
       console.info(ts);
       return _.chain(ts)
@@ -30,6 +34,10 @@ export class TabsPage {
       .reduce((sum,unread)=> sum+unread,0)
       .value();
     }).subscribe(unread => this.threadTab.badge = unread);    
+
+    user.uMap(["10002","10003"]).subscribe(r => {
+      console.info("umap",r);
+    })
 
   }
 }

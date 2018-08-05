@@ -28,7 +28,6 @@ export class SearchPage {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad SearchPage');
   }
 
   search(q){
@@ -40,7 +39,7 @@ export class SearchPage {
   }
 
   clickItem(item){
-    if(item.id == this.user.token.userId){
+    if(item.id == this.user.t.userId){
       this.navCtrl.push(MePage)
     }
     else{

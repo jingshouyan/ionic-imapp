@@ -27,10 +27,8 @@ export class MePage {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad MePage');
     this.user.currentUser
     .subscribe(user =>{
-      console.log(user)
       this.me = user
     });
   }

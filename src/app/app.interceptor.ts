@@ -17,7 +17,7 @@ export class TokenInterceptor implements HttpInterceptor {
     tokenProvider.currentToken
     .subscribe(token => {
       this.ticket = token && token.ticket || ''
-      console.log("TokenInterceptor.ticket:"+this.ticket)
+      console.info("TokenInterceptor.ticket:"+this.ticket)
     })
   }
 
@@ -31,7 +31,6 @@ export class TokenInterceptor implements HttpInterceptor {
         'Trace-Id': this.traceId(),
       }
     });
-    console.log(dummyReq)
     let obs = next.handle(dummyReq)
     .retry(3)
     .map(rsp => {
@@ -42,10 +41,9 @@ export class TokenInterceptor implements HttpInterceptor {
         if(code !==0) this.toast(`[ ${code} ] ${message}`)
         if(code === 10005) this.tokenProvider.setToken(new Token)
       }         
-      console.log(rsp);
       return rsp;
-    }).catch(err => {  
-        console.log(err);  
+    }).catch(err => {
+        console.error(err);  
         isloading && loading.dismiss()   
         this.toast(err.statusText);        
         return Observable.of(err);  

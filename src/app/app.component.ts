@@ -24,7 +24,6 @@ export class MyApp {
       statusBar.styleDefault();
       splashScreen.hide();
       tokenProvider.currentToken.subscribe(token => {
-        console.log('app token subscribe',token)
         if(token){
           if(token.usable()){
             this.rootPage = TabsPage

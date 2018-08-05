@@ -19,7 +19,6 @@ export class ContactPage {
   ) {
     this.contactProvider.currentContacts.subscribe(c =>{
       this.contacts = c
-      console.log(this.contacts)
     })
   }
 

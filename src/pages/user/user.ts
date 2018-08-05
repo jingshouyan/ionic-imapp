@@ -34,7 +34,6 @@ export class UserPage {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad UserPage');
     this.userInfo = new UserInfo(this.navParams.data);
     this.userInfo.isContact =true;
     this.uinfo.getUserInfo(this.userInfo.id,{netFirst: true})

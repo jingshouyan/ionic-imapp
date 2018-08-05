@@ -13,10 +13,8 @@ export class DbProvider {
   constructor(private platform: Platform,
     tokenProvider: TokenProvider){
        
-      tokenProvider.currentToken.subscribe(token =>{
-        if(!token || !token.usable()) {
-          return
-        }
+      tokenProvider.currentToken.filter(t => t && t.usable())
+      .subscribe(token =>{
         this.dbname = 'db:'+(token&&token.userId||'')
         this._dbPromise = new Promise((resolve, reject) => {
         try {
@@ -40,7 +38,7 @@ export class DbProvider {
         }
       })
 
-      console.log(this.dbname);
+      console.info("dbname:",this.dbname);
       this._tryInit();
     })    
   }
@@ -88,10 +86,10 @@ export class DbProvider {
   }
 
   list(table: TABLES,condition: string = '1 = 1',params: any[] = []): Observable<any[]>{
-    return this.query('SELECT * FROM ' + TABLES[table] + ' WHERE '+ condition,params).map(data => {
+    let sql = 'SELECT * FROM ' + TABLES[table] + ' WHERE '+ condition;
+    return this.query(sql,params).map(data => {
       let result = [];
       if (data.res.rows.length > 0) {
-        console.log('Rows found.',data);
         if (this.platform.is('cordova') && win.sqlitePlugin) {
           for (let i = 0; i < data.res.rows.length; i++) {
             let row = data.res.rows.item(i);
@@ -105,7 +103,7 @@ export class DbProvider {
           }
         }
       }
-      console.info("query result:",result);
+      console.info(sql,params,result);
       return result;
     });
   }
@@ -195,7 +193,6 @@ export class DbProvider {
     let promise =  new Promise((resolve, reject) => {
       try {
         this._dbPromise.then(db => {
-          console.log("query : "+query)
           db.transaction((tx: any) => {
               tx.executeSql(query, params,
                 (tx: any, res: any) => resolve({tx: tx, res: res}),
