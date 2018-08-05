@@ -33,12 +33,12 @@ export class SocketProvider {
           serverCallback && serverCallback()
         })
         socket.on("connect",() =>{
-          console.log("socket connnected.")
+          console.info("socket connnected.")
           this.isConnected = true
           this.conn.next(true)
         })
         socket.on("disconnect",() =>{
-          console.log("socket disconnnected.")
+          console.info("socket disconnnected.")
           this.isConnected = false
           this.conn.next(false)
         })
