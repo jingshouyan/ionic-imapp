@@ -3,6 +3,9 @@ import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { ThreadProvider } from '../../app/provider/thread.provider';
 import { Thread } from '../../app/app.model';
 import { ChatPage } from './../chat/chat';
+import { Observable } from 'rxjs/Rx';
+import { UserInfo } from './../../app/app.model';
+import { UserInfoProvoider } from './../../app/provider/userInfo.provider';
 
 /**
  * Generated class for the ThreadPage page.
@@ -18,19 +21,22 @@ import { ChatPage } from './../chat/chat';
 })
 export class ThreadPage {
 
-  threads: Thread[] = []
+  threads: Observable<Thread[]>;
 
   constructor(
     public navCtrl: NavController, 
     public navParams: NavParams,
     public thread: ThreadProvider,
+    public userInfo: UserInfoProvoider,
   ) {
-    thread.currentThreads.subscribe(ts => {
-      this.threads = ts
-    })
+    this.threads = thread.threads;
   }
 
   ionViewDidLoad() {
+  }
+
+  uInfo(id: string) {
+    return this.userInfo.getUserInfo(id);
   }
 
   delete(thread: Thread){

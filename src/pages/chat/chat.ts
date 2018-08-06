@@ -44,8 +44,9 @@ export class ChatPage {
     public tokenProvider: TokenProvider,
     public userInfoProvoider: UserInfoProvoider,
   ) {
-    let t = new Thread(navParams.data)
-    this.thread = threadProvider.getThread(t);
+    this.thread = new Thread(navParams.data)
+    threadProvider.getThread(this.thread.id)
+    .subscribe(t => this.thread = t);
     this.pull(true);
     threadProvider.threadMessage(this.thread.id)
     .subscribe(message =>{
@@ -75,12 +76,12 @@ export class ChatPage {
  
 
   ionViewDidLoad() {    
-    Observable.fromEvent(this.textInput.getNativeElement(),"keyup")
-    .map((e:any) => e.target.value)
-    .debounceTime(300)
-    .subscribe(value =>{
-      this.threadProvider.pushThread(this.thread)
-    })
+    // Observable.fromEvent(this.textInput.getNativeElement(),"keyup")
+    // .map((e:any) => e.target.value)
+    // .debounceTime(300)
+    // .subscribe(value =>{
+    //   this.threadProvider.newThread
+    // })
   }
 
   ionViewWillEnter(){

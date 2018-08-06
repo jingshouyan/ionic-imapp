@@ -15,18 +15,22 @@
 
 <ion-content>
     <ion-list>
-        <ion-item-sliding *ngFor="let item of threads" #itemSliding>
+        <ion-item-sliding *ngFor="let t of threads | async" #itemSliding>
           <ion-item (click)="clickItem(item)">
-            <ion-avatar item-start>
-              <img [src]="item.avatar()">
+            <ion-avatar item-start *ngIf="t.targetType === 'user'">
+                <img [src]="(uInfo(t.targetId) | async)?.avatar()">
             </ion-avatar>
-            <h2>{{ item.name }} <ion-badge color="danger" *ngIf="item.unread">{{item.unread}}</ion-badge></h2>
-            <p> {{ p(item) }}</p>
-            
-            <ion-note item-end>{{item.latestTime | date:'HH:mm:ss'| lowercase}}</ion-note>
+            <h2>{{ (uInfo(t.targetId) | async)?.name() }} </h2>
+
+
+            <p> {{ p(t) }}</p>
+            <ion-note item-end>
+              <ion-badge color="danger" *ngIf="t.unread">{{t.unread}}</ion-badge>
+              {{t.latestTime | date:'HH:mm:ss'| lowercase}}
+            </ion-note>
           </ion-item>
           <ion-item-options side="right">
-            <button ion-button (click)="delete(item);itemSliding.close()">
+            <button ion-button (click)="delete(t);itemSliding.close()">
                 <ion-icon name="trash"></ion-icon>
                 DELETE
               </button>

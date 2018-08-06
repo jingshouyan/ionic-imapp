@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { ContactProvider } from '../../app/provider/contact.provider';
-import { Contact } from '../../app/app.model';
+import { UserInfo } from '../../app/app.model';
 import { SearchPage } from '../search/search';
 import { UserPage } from '../user/user';
+import { UserInfoProvoider } from '../../app/provider/userInfo.provider';
 
 @Component({
   selector: 'page-contact',
@@ -11,15 +12,14 @@ import { UserPage } from '../user/user';
 })
 export class ContactPage {
 
-  contacts: Contact[] = []
+  contacts: UserInfo[] = []
 
   constructor(
     public navCtrl: NavController,
-    public contactProvider: ContactProvider,
+    public contact: ContactProvider,
+    public uInfo: UserInfoProvoider,
   ) {
-    this.contactProvider.currentContacts.subscribe(c =>{
-      this.contacts = c
-    })
+    this.uInfo.contacts.subscribe(cs =>this.contacts =cs)
   }
 
   search(){
@@ -31,7 +31,7 @@ export class ContactPage {
   }
 
   delete(item){
-    this.contactProvider.delContact(item.id)
+    this.contact.delContact(item.id)
     .subscribe(rsp =>{})
   }
 

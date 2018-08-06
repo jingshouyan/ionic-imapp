@@ -32,7 +32,11 @@ export class UserProvider {
     private storage: Storage,
   ){
 
-    this.uid.bufferTime(50).subscribe(ids => this.prepares(ids));
+    this.uid.distinct()
+    .bufferTime(50)
+    .filter(x => x.length > 0)
+    .do(x => console.log(x))
+    .subscribe(ids => this.prepares(ids));
 
     // update 流 计算得到 userMap
     this.userMap = this.userUpdates
@@ -46,7 +50,9 @@ export class UserProvider {
     //新用户流 导入 更新留
     this.newUser.map((u): IUserOpt =>{
       return uMap => {
-        uMap[u.id] = u;
+        let map = {};
+        map[u.id] = u;
+        uMap = Object.assign({},uMap,map);
         return uMap;
       };
     }).subscribe(this.userUpdates);
@@ -72,7 +78,6 @@ export class UserProvider {
         this.currentLogin.next(login)
       }      
     });
-
    }
 
    // 准备数据
@@ -80,8 +85,18 @@ export class UserProvider {
      this.uid.next(id);
    }
 
+   getUser(id: string):Observable<User>{
+    return this.userMap
+    .map(umap =>umap[id])
+    .filter(u => !!u);
+   }
+
    // 准备数据
    private prepares(ids: string[]){
+     console.log(ids);
+     if(ids.length == 0){
+       return;
+     }
      let noCache: string[] = [];
      _.chain(ids).forEach(id =>{
       this._userMap[id] || noCache.push(id);
@@ -96,14 +111,15 @@ export class UserProvider {
          noCache = noCache.filter(id => u.id == id);
        });
        if(noCache.length > 0){
-         this.getUsers(noCache).subscribe();
+         console.log(ids,noCache);
+         this.getUsersAjax(noCache).subscribe();
        }
       });
      }
    }
 
   // 通过网络获取多个用户信息，并将每一个用户发输出到 newUser
-  getUsers(ids: string[]):Observable<{[id: string]: User}>{
+  private getUsersAjax(ids: string[]):Observable<{[id: string]: User}>{
     const endpoint = "user/GetUser.json"  
     return this.api.post(endpoint,{ids: ids})
     .map(rsp => {
@@ -119,13 +135,14 @@ export class UserProvider {
     });
   }
   //通过网络获取单个用户信息, 10 秒内数据为有效数据
-  getUser(id: string): Observable<User>{
+  getUserAjax(id: string): Observable<User>{
+    console.log("getUser",id);
     let sub = new Subject<User>();
     let user = this._userMap[id]
     sub.next(user || new User)
     if(user && user.loadTime() > 10000){
-      this.getUsers([id]).subscribe(uMap =>{
-        sub.next(uMap[id] || new User);
+      this.getUsersAjax([id]).subscribe(uMap =>{
+        sub.next(uMap[id] || new User);        
       })
     }
     return sub;

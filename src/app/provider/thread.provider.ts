@@ -3,9 +3,7 @@ import { DbProvider, TABLES } from "./db.provider";
 import { TokenProvider } from "./token.provider";
 import { Thread, Message ,Token } from "../app.model";
 import { MessageProvider } from "./message.provider";
-import { Subject, BehaviorSubject, Observable } from 'rxjs/Rx';
-import { ContactProvider } from "./contact.provider";
-import { UserProvider } from './user.provider';
+import { Subject, Observable } from 'rxjs/Rx';
 import _ from 'underscore';
 
 interface IThreadOpt extends Function {
@@ -13,10 +11,6 @@ interface IThreadOpt extends Function {
 }
 @Injectable()
 export class ThreadProvider {
-
-  private threadCache: {[id: string]: Thread} = {}
-  private threadMessageCache:{[id: string]: Message[]} = {}
-  currentThreads: Subject<Thread[]> = new BehaviorSubject<Thread[]>([])
   private token : Token = new Token;
 
   newThread: Subject<Thread> = new Subject();
@@ -50,7 +44,7 @@ export class ThreadProvider {
         return {};
       };
     })
-    .subscribe(opt =>this.threadUpdates.next(opt));
+    .subscribe(this.threadUpdates);
 
     //newThread 流 推送到 threadUPdates
     this.newThread.map((t): IThreadOpt =>{
@@ -80,7 +74,7 @@ export class ThreadProvider {
         return map;
       };
     })
-    .subscribe(opt =>this.threadUpdates.next(opt));
+    .subscribe(this.threadUpdates);
 
 
 
@@ -117,18 +111,9 @@ export class ThreadProvider {
       return thread;
     })
     // TODO: 多个 subscribe(this.newTread) 只有一个生效，why ?
-    .subscribe(t => this.newThread.next(t));
+    .subscribe(this.newThread);
   
 
-  }
-
-  getMessages(tid: string){
-    let messages = this.threadMessageCache[tid];
-    if(!messages){
-      messages = [];
-      this.threadMessageCache[tid] = messages;
-    } 
-    return messages;
   }
 
 
@@ -142,40 +127,19 @@ export class ThreadProvider {
     return msgCtx
   }
 
-  getThread(thread: Thread){
-    let t = this.threadCache[thread.id]
-    if(!t){
-      this.pushThread(thread)
-    }
-    return t || thread
+  getThread(tid: string){
+    return this.threadMap
+    .map(tmap => tmap[tid])
+    .filter(t => !!t);
   }
-
-  pushThread(thread: Thread){
-    this.threadCache[thread.id] = thread
-    this.db.replace(thread,TABLES.Thread).subscribe(res => {});
-    this.nextThreads()
-  }
-
-  private nextThreads(){
-    let threads: Thread[] = []
-    for (const key in this.threadCache) {
-      if (this.threadCache.hasOwnProperty(key)) {
-        const thread = this.threadCache[key];
-        threads.push(thread)
-      }
-    }
-    threads.sort((a,b) => {
-      return b.latestTime - a.latestTime
-    })
-    this.currentThreads.next(threads)
-  } 
-
-
 
   delThread(thread: Thread){
-    delete this.threadCache[thread.id];
-    this.db.delete(TABLES.Thread,thread).subscribe(res => {})
-    this.nextThreads()
+    this.db.delete(TABLES.Thread,thread).subscribe();
+    this.threadUpdates.next((map) => {
+      delete map[thread.id];
+      map = Object.assign({},map);
+      return map;
+    });
   }
 
 
@@ -196,7 +160,7 @@ export class ThreadProvider {
     .map(rows => {
       let messages = _.chain(rows).map(row => Message.load(row)).value();
       return messages;
-    })
+    });
     return obs;
   }
 

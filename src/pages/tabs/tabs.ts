@@ -28,16 +28,11 @@ export class TabsPage {
     user: UserProvider,
   ) {
     thread.threads.map(ts => {
-      console.info(ts);
       return _.chain(ts)
       .map(t => t.unread)
       .reduce((sum,unread)=> sum+unread,0)
       .value();
     }).subscribe(unread => this.threadTab.badge = unread);    
-
-    user.uMap(["10002","10003"]).subscribe(r => {
-      console.info("umap",r);
-    })
 
   }
 }
