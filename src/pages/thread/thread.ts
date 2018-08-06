@@ -1,11 +1,9 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { ThreadProvider } from '../../app/provider/thread.provider';
-import { Thread } from '../../app/app.model';
+import { Thread, User } from '../../app/app.model';
 import { ChatPage } from './../chat/chat';
 import { Observable } from 'rxjs/Rx';
-import { UserInfo } from './../../app/app.model';
-import { UserInfoProvoider } from './../../app/provider/userInfo.provider';
 
 /**
  * Generated class for the ThreadPage page.
@@ -27,7 +25,6 @@ export class ThreadPage {
     public navCtrl: NavController, 
     public navParams: NavParams,
     public thread: ThreadProvider,
-    public userInfo: UserInfoProvoider,
   ) {
     this.threads = thread.threads;
   }
