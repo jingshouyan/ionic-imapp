@@ -17,11 +17,11 @@ export class UserProvider {
   userUpdates: Subject<IUserOpt> = new Subject();
   userMap: Observable<{[id: string]: User}>;
   _userMap: {[id: string]: User} = {};
+  uid: Subject<string> = new Subject();
 
 
   currentUser: Subject<User> = new BehaviorSubject<User>(new User)
   currentLogin: Subject<Login> = new BehaviorSubject<Login>(new Login)
-  cacheChange: Subject<User> = new Subject<User>()
 
   t: Token = new Token
   userCache: {[id: string]: User} = {}
@@ -31,6 +31,9 @@ export class UserProvider {
     private db: DbProvider,
     private storage: Storage,
   ){
+
+    this.uid.bufferTime(50).subscribe(ids => this.prepares(ids));
+
     // update 流 计算得到 userMap
     this.userMap = this.userUpdates
     .scan((uMap: {[id: string]: User},opt: IUserOpt) => {
@@ -72,7 +75,13 @@ export class UserProvider {
 
    }
 
-   uMap(ids: string[]){
+   // 准备数据
+   prepare(id){
+     this.uid.next(id);
+   }
+
+   // 准备数据
+   private prepares(ids: string[]){
      let noCache: string[] = [];
      _.chain(ids).forEach(id =>{
       this._userMap[id] || noCache.push(id);
@@ -91,7 +100,6 @@ export class UserProvider {
        }
       });
      }
-     return this.userMap;
    }
 
   // 通过网络获取多个用户信息，并将每一个用户发输出到 newUser
@@ -186,112 +194,5 @@ export class UserProvider {
     })
   }
 
-  getUserCache(id: string): Observable<User>{
-    return this.getUserMap2([id])
-    .map(userMap => {
-      return userMap[id] || new User
-    })
-  }
-
-  getUserMap(ids: string[]): Subject<{[id: string]: User}>{
-    let usersSub: Subject<{[id: string]: User}> = new Subject<{[id: string]: User}>()
-    let users: {[id: string]: User} = {}
-    let idNoCache: string[] = []
-    ids.forEach(id =>{
-      let user = this.userCache[id]
-      if(user){
-        users[user.id] = user
-      }else{
-        idNoCache.push(id)
-      }
-    })
-    if(idNoCache.length === 0){
-      usersSub.next(users)
-    }
-    else{
-      this.db.list(TABLES.User,"id in (?)",[idNoCache])
-      .subscribe(rows => {
-        rows.forEach(row =>{
-          let user = new User(row)
-          users[user.id] = user
-          this.userCache[user.id] = user
-          idNoCache = idNoCache.filter(id => id != user.id)          
-        })
-        if(idNoCache.length === 0){
-          usersSub.next(users)
-        }else{
-          const endpoint = "user/GetUser.json"  
-          this.api.post(endpoint,{ids: idNoCache})
-          .subscribe(rsp =>{
-            if(rsp.code === 0 && rsp.data.length > 0){
-              _.chain(rsp.data).forEach(row =>{
-                let user = new User(row)
-                users[user.id] = user
-                this.cache(user)
-              })
-            }
-            usersSub.next(users)
-          })
-        }
-      })
-    }  
-    return usersSub
-  }
-
-
-  getUserMap2(ids: string[]): Observable<void>{
-    let fun = (callback) =>{
-      let users: {[id: string]: User} = {}
-      let idNoCache: string[] = []
-      ids.forEach(id =>{
-        let user = this.userCache[id]
-        if(user){
-          users[user.id] = user
-        }else{
-          idNoCache.push(id)
-        }
-      })
-      if(idNoCache.length === 0){
-        callback(users)
-      }
-      else{
-        this.db.list(TABLES.User,"id in (?)",[idNoCache])
-        .subscribe(rows => {
-          rows.forEach(row =>{
-            let user = new User(row)
-            users[user.id] = user
-            this.userCache[user.id] = user
-            idNoCache = idNoCache.filter(id => id != user.id)          
-          })
-          if(idNoCache.length === 0){
-            callback(users)
-          }else{
-            const endpoint = "user/GetUser.json"  
-            this.api.post(endpoint,{ids: idNoCache})
-            .subscribe(rsp =>{
-              if(rsp.code === 0 && rsp.data.length > 0){
-                _.chain(rsp.data).forEach(row =>{
-                  let user = new User(row)
-                  users[user.id] = user
-                  this.cache(user)
-                })
-              }
-              callback(users)
-            })
-          }
-        })
-      }
-      return users;
-    }
-    let obs = Observable.bindCallback(fun)
-    return obs();
-  }
-
-
-
-  private cache(user: User){
-    this.userCache[user.id] = user
-    this.db.replace(user,TABLES.User)
-    this.cacheChange.next(user)
-  }
+  
 }

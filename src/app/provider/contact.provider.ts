@@ -17,16 +17,19 @@ export class ContactProvider {
   contactUpates: Subject<IContactOpt> = new Subject();
   contacts: Subject<Contact[]> = new Subject();
 
-
-  currentContacts: Subject<Contact[]> = new BehaviorSubject<Contact[]>([])
-  contactChange: Subject<Contact> = new Subject<Contact>()
-  _contactMap: {[id: string]: Contact} = {}
   revision: number = 0;
   constructor(
     private api: ApiProvider,
     private db: DbProvider,
     token: TokenProvider,
   ){
+
+    // update 流推送到 contactMap
+    this.contactMap = this.contactUpates
+    .scan((cMap:{[id: string]: Contact},opt:IContactOpt) => {
+      return opt(cMap);
+    },{}).publishReplay(1).refCount();
+
 
     //当 token 变化时，推送清除数据操作到 threadUpdates
     token.currentToken.filter(t => {
@@ -36,6 +39,29 @@ export class ContactProvider {
         return {};
       };
     }).subscribe(this.contactUpates);
+
+    // newContact 更新到 update 
+    this.newContact.map((contact): IContactOpt => {
+      return (cMap) =>{
+        let map = {};
+        map[contact.id] = contact;
+        cMap = Object.assign({},cMap,map);
+        return cMap;
+      };
+    }).subscribe(this.contactUpates);
+
+    // 更新 revision
+    this.newContact.subscribe(contact => {
+      if(contact.revision > this.revision){
+        this.revision = contact.revision
+      }
+    });
+    // 存储到db
+    this.newContact.subscribe(contact => {
+      if(!contact._db ){
+        this.db.replace(contact,TABLES.Contact);
+      }
+    });
 
 
     //当 token 变化时，加载数据库数据
@@ -47,46 +73,19 @@ export class ContactProvider {
       .subscribe(rows =>{
         _.chain(rows).forEach(row => {
           let contact = new Contact(row)
-          if(contact.revision > this.revision){
-            this.revision = contact.revision
-          }
           contact._db = true;
           this.newContact.next(contact);
         });
-                
+        this.syncContacts();
       });
     });
   }
 
-  loadData(){
-    this._contactMap = {}    
-    this.db.list(TABLES.Contact)
-    .subscribe(rows =>{
-      rows.forEach(row => {
-        let contact = new Contact(row)
-        this._contactMap[contact.id] = contact
-        this.contactChange.next(contact)
-        if(contact.revision > this.revision){
-          this.revision = contact.revision
-        }
-      })
-      this.pushContacts()
-      this.syncContacts()
-    })
 
-  }
 
-  private pushContacts(){
-    let contacts: Contact[] = []
-    for(let id in this._contactMap){
-      let contact = this._contactMap[id]
-      if(contact.deletedAt<0){
-        contacts.push(contact)
-      }
-    }
-    this.currentContacts.next(contacts)
-  }
 
+
+  // 通过网络同步数据
   private syncContacts(){
     this.listContact(this.revision)
     .subscribe(rsp => {
@@ -94,14 +93,8 @@ export class ContactProvider {
         rsp.data.forEach(row => {
           row["id"] = row["userId"]
           let contact = new Contact(row)
-          this.contactChange.next(contact)
-          this.db.replace(contact,TABLES.Contact)
-          this._contactMap[contact.id] = contact
-          if(contact.revision > this.revision){
-            this.revision = contact.revision
-          }
+          this.newContact.next(contact);
         })
-        this.pushContacts()
       }
     })
   }
@@ -112,14 +105,8 @@ export class ContactProvider {
     return this.api.post(endpoint,{revision: revision})    
   }
 
-  getContact(id: string): Contact{
-    let contact = this._contactMap[id]
-    if(contact && !contact.deleted()){
-      return contact
-    }
-    return undefined
-  }
 
+  //添加联系人
   addContact(opt: any){
     let endpoint = "relationship/AddContact.json"
     return this.api.post(endpoint,{userId: opt.userId,remark: opt.remark,type: opt.type})
@@ -131,6 +118,7 @@ export class ContactProvider {
     })
   }
 
+  //删除联系人
   delContact(id: string){
     let endpoint = "relationship/DelContact.json"
     return this.api.post(endpoint,{userId:id})
@@ -140,5 +128,13 @@ export class ContactProvider {
       }
       return rsp
     })
+  }
+
+
+
+  //准备废弃
+  getContact(id: string): Contact{
+
+    return undefined
   }
 }
