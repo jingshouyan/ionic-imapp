@@ -24,15 +24,18 @@ export class UserInfoProvoider {
     // userMap,contactMap 合并为 uInfoMap 流
     // debounceTime 防止运算量过大
     this.uInfoMap = user.userMap.debounceTime(50)
-    .combineLatest(contact.contactMap.debounceTime(20),(umap,cmap) => {
+    .combineLatest(contact.contactMap.debounceTime(50),(umap,cmap) => {
       let uInfoMap: {[id: string]: UserInfo} = {};
       if(umap && cmap){
         const cY = { isContact: true};
         const cN = { isContact: false};
         _.map(umap,(user,id)=>{
-          let contact = cmap[id];
-          let c = (!contact || contact.deleted()) ? cN : contact;
-          let uinfo = new UserInfo(Object.assign(cY,c,user));
+          let c = cmap[id],uinfo
+          if(c && !c.deleted()){
+            uinfo = new UserInfo(Object.assign(c,user,cY));
+          }else {
+            uinfo = new UserInfo(Object.assign(user,cN));
+          }
           uInfoMap[id] = uinfo;
         });
       }
@@ -47,7 +50,9 @@ export class UserInfoProvoider {
         }
       });
       return contacts;
-    }).subscribe(this.contacts);
+    })
+    .do(x => console.warn('xxx',x))
+    .subscribe(this.contacts);
 
   }
 

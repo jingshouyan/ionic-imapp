@@ -19,7 +19,9 @@ export class ContactPage {
     public contact: ContactProvider,
     public uInfo: UserInfoProvoider,
   ) {
-    this.uInfo.contacts.subscribe(cs =>this.contacts =cs)
+    this.uInfo.contacts
+    .do(x => console.info("!!!",x))
+    .subscribe(cs =>this.contacts =cs)
   }
 
   search(){

@@ -45,6 +45,7 @@ export class ChatPage {
     public userInfoProvoider: UserInfoProvoider,
   ) {
     this.thread = new Thread(navParams.data)
+    console.log(this.thread);
     threadProvider.getThread(this.thread.id)
     .subscribe(t => this.thread = t);
     this.pull(true);
