@@ -32,7 +32,7 @@ export class UserProvider {
     private storage: Storage,
   ){
 
-    this.uid.distinct()
+    this.uid.distinctUntilChanged()
     .bufferTime(50)
     .filter(x => x.length > 0)
     .do(x => console.log(x))
@@ -80,9 +80,19 @@ export class UserProvider {
     });
    }
 
+   private _idCache: {[id:string]: number} = {};
    // 准备数据
    prepare(id){
-     this.uid.next(id);
+     let u = this._userMap[id];
+     if(u){
+       return;
+     }
+     let now = new Date().getTime();
+     let idTime = this._idCache[id];
+     if(!idTime || (now -idTime) > 10000){
+      this._idCache[id] = now;
+      this.uid.next(id);
+     }
    }
 
    getUser(id: string):Observable<User>{

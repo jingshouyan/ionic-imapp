@@ -18,9 +18,9 @@
         <ion-item-sliding *ngFor="let t of threads | async" #itemSliding>
           <ion-item (click)="clickItem(item)">
             <ion-avatar item-start *ngIf="t.targetType === 'user'">
-                <img [src]="(uInfo(t.targetId) | async)?.avatar()">
+                <img [src]="t.avatar()">
             </ion-avatar>
-            <h2>{{ (uInfo(t.targetId) | async)?.name() }} </h2>
+            <h2>{{ t.name }} </h2>
 
 
             <p> {{ p(t) }}</p>

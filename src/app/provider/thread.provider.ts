@@ -5,6 +5,7 @@ import { Thread, Message ,Token } from "../app.model";
 import { MessageProvider } from "./message.provider";
 import { Subject, Observable } from 'rxjs/Rx';
 import _ from 'underscore';
+import { UserInfoProvoider } from "./userInfo.provider";
 
 interface IThreadOpt extends Function {
   (tMap: {[id: string]: Thread}): {[id: string]: Thread};
@@ -21,6 +22,7 @@ export class ThreadProvider {
   constructor(
     private db :DbProvider,
     token: TokenProvider,
+    uInfo: UserInfoProvoider,
     private message: MessageProvider,
   ){
 
@@ -31,7 +33,19 @@ export class ThreadProvider {
     },{}).publishReplay(1).refCount();
 
     // threadMap 流转换为 threads
-    this.threadMap.map(tMap => {
+    this.threadMap.combineLatest(uInfo.uInfoMap.debounceTime(50),(tmap,imap) =>{
+      _.forEach(tmap,(t) =>{
+        if(t.targetType === 'user'){
+          let i = imap[t.targetId];
+          if(i){
+            t.name = i.name();
+            t.icon = i.avatar();
+          }
+        }
+      })
+      return tmap;
+    })
+    .map(tMap => {
       return _.map(tMap,t=>t)
       .sort((a,b) => b.latestTime - a.latestTime);      
     }).subscribe(this.threads);

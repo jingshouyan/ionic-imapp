@@ -5,7 +5,6 @@ import { MePage } from '../me/me';
 import { ThreadPage } from '../thread/thread';
 import { ThreadProvider } from '../../app/provider/thread.provider';
 import _ from 'underscore';
-import { UserProvider } from '../../app/provider/user.provider';
 
 @Component({
   templateUrl: 'tabs.html'
@@ -25,7 +24,6 @@ export class TabsPage {
 
   constructor(
     thread: ThreadProvider,
-    user: UserProvider,
   ) {
     thread.threads.map(ts => {
       return _.chain(ts)

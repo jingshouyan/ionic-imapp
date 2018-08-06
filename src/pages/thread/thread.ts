@@ -35,10 +35,6 @@ export class ThreadPage {
   ionViewDidLoad() {
   }
 
-  uInfo(id: string) {
-    return this.userInfo.getUserInfo(id);
-  }
-
   delete(thread: Thread){
     this.thread.delThread(thread)
   }
