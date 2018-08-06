@@ -13,7 +13,7 @@
 
 <ion-content>
   <ion-list>
-    <ion-item-sliding *ngFor="let item of contacts" #itemSliding>
+    <ion-item-sliding *ngFor="let item of contacts | async" #itemSliding>
     <ion-item (click)="clickItem(item)">
     <ion-avatar item-start>
         <img [src]="item.avatar()">

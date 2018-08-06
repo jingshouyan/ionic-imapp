@@ -3,7 +3,7 @@ import { DbProvider, TABLES } from "./db.provider";
 import { TokenProvider } from "./token.provider";
 import { Thread, Message ,Token } from "../app.model";
 import { MessageProvider } from "./message.provider";
-import { Subject, Observable } from 'rxjs/Rx';
+import { Subject, Observable, BehaviorSubject } from 'rxjs/Rx';
 import _ from 'underscore';
 import { UserInfoProvoider } from "./userInfo.provider";
 
@@ -17,7 +17,7 @@ export class ThreadProvider {
   newThread: Subject<Thread> = new Subject();
   threadMap: Observable<{[id: string]: Thread}>;
   threadUpdates: Subject<IThreadOpt> = new Subject();
-  threads: Subject<Thread[]> = new Subject();
+  threads: Subject<Thread[]> = new BehaviorSubject([]);
 
   constructor(
     private db :DbProvider,
