@@ -6,6 +6,7 @@ import { UserProvider } from '../../app/provider/user.provider';
 import { Thread } from './../../app/app.model';
 import { ChatPage } from './../chat/chat';
 import { UserInfoProvoider } from '../../app/provider/userInfo.provider';
+import { Observable, Subscription } from 'rxjs/Rx';
 
 /**
  * Generated class for the UserPage page.
@@ -21,7 +22,9 @@ import { UserInfoProvoider } from '../../app/provider/userInfo.provider';
 })
 export class UserPage {
 
-  userInfo: UserInfo = new UserInfo
+  userInfo: UserInfo;
+
+  unsub: Subscription
 
   constructor(
     public navCtrl: NavController,
@@ -30,15 +33,40 @@ export class UserPage {
     public user: UserProvider,
     public uinfo: UserInfoProvoider,
   ) {
-
-  }
-
-  ionViewDidLoad() {
+    console.log("www",this)
     this.userInfo = new UserInfo(this.navParams.data);
-    this.userInfo.isContact =true;
-    this.uinfo.getUserInfo(this.userInfo.id,{netFirst: true})
+    this.unsub = uinfo.getUserInfo(this.userInfo.id,{ajax: true})
+    .do(x => console.log("xxxx",x))
     .subscribe(u => this.userInfo = u);
   }
+
+  ionViewDidLoad(){
+      console.log('触发ionViewDidLoad');
+  }
+
+  ionViewWillEnter(){
+      console.log('触发ionViewWillEnter');
+  }
+
+  ionViewDidEnter(){
+      console.log('触发ionViewDidEnter');
+  }
+
+  ionViewWillLeave(){
+      console.log('触发ionViewWillLeave');
+  }
+
+  ionViewDidLeave(){
+      console.log('触发ionViewDidLeave');
+  }
+
+  ionViewWillUnload(){
+      console.log('触发ionViewWillUnload');
+      // if(this.unsub){
+      //   this.unsub.unsubscribe();
+      // }
+  }
+
 
   addContact($event){
     this.contact.addContact({userId: this.userInfo.id})

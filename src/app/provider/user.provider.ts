@@ -146,11 +146,13 @@ export class UserProvider {
   }
   //通过网络获取单个用户信息, 10 秒内数据为有效数据
   getUserAjax(id: string): Observable<User>{
+    let now = new Date().getTime();
     console.log("getUser",id);
     let sub = new Subject<User>();
     let user = this._userMap[id]
     sub.next(user || new User)
-    if(user && user.loadTime() > 10000){
+    console.log(user);
+    if(!user || (now -user.loadTime()) > 10000){
       this.getUsersAjax([id]).subscribe(uMap =>{
         sub.next(uMap[id] || new User);        
       })
