@@ -99,11 +99,12 @@ export class ChatPage {
   }
 
   ionViewWillLeave(){
+    this.thread.unread = 0;
+    this.threadProvider.newThread.next(this.thread);
     console.log('触发ionViewWillLeave');
   }
 
   ionViewDidLeave(){
-    this.threadProvider.newThread.next(this.thread);
     console.log('触发ionViewDidLeave');
   }
 
