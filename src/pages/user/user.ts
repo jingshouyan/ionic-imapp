@@ -6,7 +6,7 @@ import { UserProvider } from '../../app/provider/user.provider';
 import { Thread } from './../../app/app.model';
 import { ChatPage } from './../chat/chat';
 import { UserInfoProvoider } from '../../app/provider/userInfo.provider';
-import { Observable, Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs/Rx';
 
 /**
  * Generated class for the UserPage page.

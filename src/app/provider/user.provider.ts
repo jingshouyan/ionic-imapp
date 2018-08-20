@@ -130,7 +130,7 @@ export class UserProvider {
 
   // 通过网络获取多个用户信息，并将每一个用户发输出到 newUser
   private getUsersAjax(ids: string[]):Observable<{[id: string]: User}>{
-    const endpoint = "user/GetUser.json"  
+    const endpoint = "user/getUser.json"  
     return this.api.post(endpoint,{ids: ids})
     .map(rsp => {
       let uMap: {[id: string]: User} = {};
@@ -161,7 +161,7 @@ export class UserProvider {
   }
 
   login(login:Login){
-    const endpoint = "user/Login.json"
+    const endpoint = "user/login.json"
     return this.api.post(endpoint,login,true)
     .map(rsp => {
       if(rsp.code === 0){
@@ -184,7 +184,7 @@ export class UserProvider {
     this.db.find(TABLES.User,this.t.userId)
     .subscribe(value => {
       this.currentUser.next(new User(value));
-      const endpoint = "user/Me.json"    
+      const endpoint = "user/me.json"    
       this.api.post(endpoint,{})
       .subscribe(rsp =>{
         if(rsp.code === 0 && rsp.data){
@@ -197,24 +197,24 @@ export class UserProvider {
   }
 
   logout(){
-    const endpoint = "user/Logout.json"    
+    const endpoint = "user/logout.json"    
     this.api.post(endpoint,{})
     .subscribe(rsp => {})
     this.token.setToken(new Token)
   }
 
   register(reg: Register){
-    const endpoint = "user/RegUser.json"
+    const endpoint = "user/regUser.json"
     return this.api.post(endpoint, reg)    
   }
 
   search(q: string): Observable<User[]>{
-    const endpoint = "user/SearchUser.json"
+    const endpoint = "user/searchUser.json"
     return this.api.post(endpoint,{q:q})
     .map(rsp =>{
       let users: User[] = []
-      if(rsp.code === 0 && rsp.data.length >0){
-        rsp.data.forEach(row => {
+      if(rsp.code === 0 && rsp.data.list.length >0){
+        rsp.data.list.forEach(row => {
           let user = new User(row)
           users.push(user)
         })

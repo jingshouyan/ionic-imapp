@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Subject, BehaviorSubject, Observable } from 'rxjs/Rx';
+import { Subject, Observable } from 'rxjs/Rx';
 import { Contact } from '../app.model';
 import { DbProvider, TABLES } from './db.provider';
 import { TokenProvider } from './token.provider';
@@ -101,14 +101,14 @@ export class ContactProvider {
 
 
   private listContact(revision) {
-    let endpoint = "relationship/ListContact.json"
+    let endpoint = "relationship/listContact.json"
     return this.api.post(endpoint,{revision: revision})    
   }
 
 
   //添加联系人
   addContact(opt: any){
-    let endpoint = "relationship/AddContact.json"
+    let endpoint = "relationship/addContact.json"
     return this.api.post(endpoint,{userId: opt.userId,remark: opt.remark,type: opt.type})
     .map(rsp =>{
       if(rsp.code === 0){
@@ -120,7 +120,7 @@ export class ContactProvider {
 
   //删除联系人
   delContact(id: string){
-    let endpoint = "relationship/DelContact.json"
+    let endpoint = "relationship/delContact.json"
     return this.api.post(endpoint,{userId:id})
     .map(rsp=>{
       if(rsp.code === 0){

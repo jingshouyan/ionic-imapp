@@ -3,7 +3,6 @@ import { IonicPage, NavController, NavParams, TextInput, Content } from 'ionic-a
 import { Message, Thread } from '../../app/app.model';
 import { MessageProvider } from './../../app/provider/message.provider';
 import { ThreadProvider } from '../../app/provider/thread.provider';
-import { Observable } from 'rxjs/Rx';
 import { TokenProvider } from '../../app/provider/token.provider';
 import { UserInfo } from './../../app/app.model';
 import { UserInfoProvoider } from './../../app/provider/userInfo.provider';

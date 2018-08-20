@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { ThreadProvider } from '../../app/provider/thread.provider';
-import { Thread, User } from '../../app/app.model';
+import { Thread } from '../../app/app.model';
 import { ChatPage } from './../chat/chat';
 import { Observable } from 'rxjs/Rx';
 

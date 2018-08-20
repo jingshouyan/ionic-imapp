@@ -18,7 +18,7 @@ import { UserPage } from '../user/user';
 })
 export class SearchPage {
 
-  items: any[]
+  users: any[]
 
   constructor(
     public navCtrl: NavController, 
@@ -35,15 +35,18 @@ export class SearchPage {
       return
     }
     this.user.search(q)
-    .subscribe(users => this.items = users)
+    .subscribe(users => {
+      this.users = users
+      console.log(this.users);
+    });
   }
 
-  clickItem(item){
-    if(item.id == this.user.t.userId){
+  clickItem(user){
+    if(user.id == this.user.t.userId){
       this.navCtrl.push(MePage)
     }
     else{
-      this.navCtrl.push(UserPage,item)
+      this.navCtrl.push(UserPage,user)
     }
   }
 
