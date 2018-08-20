@@ -16,7 +16,8 @@
     <div *ngFor="let message of messages">
         <ion-card>
       <ion-item *ngIf="me(message)">
-          <ion-note item-start>{{message.sentAt | date:'HH:mm:ss'| lowercase}}</ion-note>
+          <ion-note item-start>{{message.sentAt | date:'HH:mm:ss'}}</ion-note>
+          <ion-note item-start>{{message.state}}</ion-note>
           <h2 item-content>{{ message.text.content }} </h2> 
           <ion-avatar  item-end>
               <img [src]="uInfoMap[message.senderId].avatar()">
@@ -26,9 +27,10 @@
           <ion-avatar  item-start>
               <img [src]="uInfoMap[message.senderId].avatar()">
           </ion-avatar>
-          <p> {{ (uInfoMap[message.senderId])?.name() }} </p>
-          <h2 item-text-wrap>{{ message.text.content }} </h2>    
-          <ion-note item-end>{{message.sentAt | date:'HH:mm:ss'| lowercase}}</ion-note>
+          <p> {{ (uInfoMap[message.senderId]).name() }} </p>
+          <h2 item-text-wrap>{{ message.text.content }} </h2>
+          <ion-note item-start>{{message.state}}</ion-note>    
+          <ion-note item-end>{{message.sentAt | date:'HH:mm:ss'}}</ion-note>
       </ion-item>
     </ion-card>
     </div>

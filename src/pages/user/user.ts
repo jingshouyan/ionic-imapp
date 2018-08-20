@@ -36,7 +36,6 @@ export class UserPage {
     console.log("www",this)
     this.userInfo = new UserInfo(this.navParams.data);
     this.unsub = uinfo.getUserInfo(this.userInfo.id,{ajax: true})
-    .do(x => console.log("xxxx",x))
     .subscribe(u => this.userInfo = u);
   }
 
@@ -62,9 +61,10 @@ export class UserPage {
 
   ionViewWillUnload(){
       console.log('触发ionViewWillUnload');
-      // if(this.unsub){
-      //   this.unsub.unsubscribe();
-      // }
+      if(this.unsub){
+        this.unsub.unsubscribe();
+        delete this.unsub;
+      }
   }
 
 

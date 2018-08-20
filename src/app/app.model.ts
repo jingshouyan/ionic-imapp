@@ -264,6 +264,9 @@ export class Msg {
   relatedUsers: string
   sentAt: number
   threadId: string
+  localId: number
+  localTime: number
+  state: number
 
   constructor(opt?: any){
     this.id = opt && opt.id || 0
@@ -276,6 +279,9 @@ export class Msg {
     this.relatedUsers = opt && opt.relatedUsers || ''
     this.sentAt = opt && opt.sentAt || 0
     this.threadId = opt && opt.threadId || ''
+    this.localId = opt && opt.localId || new Date().getTime()
+    this.localTime = opt && opt.localTime || new Date().getTime()
+    this.state = opt && opt.state || 0
   }
 
   static load(opt?: any): Msg {

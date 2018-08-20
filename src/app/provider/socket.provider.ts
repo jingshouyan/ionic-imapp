@@ -55,19 +55,28 @@ export class SocketProvider {
     this.newMessage.next(message)
   }
 
-  send(message:Message): Observable<void>{
-    let fun = (callback) => {
-      if(this.isConnected){
-        this.socket.emit("message",message,callback)
+  send(message:Message): Observable<Rsp>{
+    let promise = new Promise<Rsp>((resolve) => {
+      try{
+        if(this.isConnected){
+          this.socket.emit("message",message,(r) => {
+            let rsp = new Rsp(r);
+            resolve(rsp);
+          })
+        }
+        else {
+          let rsp = new Rsp;
+          rsp.code = 10001;
+          rsp.message = 'socket disconneted!';
+          resolve(rsp);
+        }
+      } catch(err) {
+        let rsp = new Rsp;
+        rsp.code = 10002;
+        rsp.message = err.err;
+        resolve(rsp);
       }
-      else {
-        let rsp = new Rsp
-        rsp.code = 10001
-        rsp.message = "socket disconneted!"
-        callback(rsp)
-      }
-    }
-    let boundFun = Observable.bindCallback(fun)
-    return boundFun()
+    });
+    return Observable.fromPromise(promise);
   }
 }

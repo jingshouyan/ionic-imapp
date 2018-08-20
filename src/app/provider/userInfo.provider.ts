@@ -54,8 +54,12 @@ export class UserInfoProvoider {
     .subscribe(this.contacts);
   }
 
-  getUserInfo(id: string,opt: any = {netFirst: false}): Observable<UserInfo>{
-    this.user.prepare(id);
+  getUserInfo(id: string,opt: any = {ajax: false}): Observable<UserInfo>{
+    if (opt.ajax) {
+      this.user.getUserAjax(id);
+    } else {
+      this.user.prepare(id);
+    }
     let obs = this.obsMap[id];
     if(!obs){
       obs = this.uInfoMap

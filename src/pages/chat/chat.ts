@@ -33,6 +33,9 @@ export class ChatPage {
 
   uInfoMap: {[id: string]: UserInfo} = {};
 
+  //存储未完成的消息
+  mmap: {[localId: string]: Message} = {};
+
   myId: string = "";
 
   constructor(
@@ -46,11 +49,23 @@ export class ChatPage {
     this.thread = new Thread(navParams.data)
     threadProvider.getThread(this.thread.id)
     .subscribe(t => this.thread = t);
-    this.pull(true);
+
     threadProvider.threadMessage(this.thread.id)
     .subscribe(message =>{
       this.uInfo(message.senderId);
-      this.messages.push(message);
+      let m = this.mmap[message.localId];
+      if (!m) {
+        this.messages.push(message);
+        if(message.state !== 0){
+          this.mmap[message.localId] = message;
+        }
+      } else {
+        m = Object.assign(m,message);
+        if(message.state === 0) {
+          delete this.mmap[message.localId];
+        }
+      }
+
       this.onMessageScroll();
     });
     tokenProvider.currentToken.subscribe(t =>{
@@ -66,6 +81,7 @@ export class ChatPage {
       u.id = id;
       this.uInfoMap[id] = u;
       this.userInfoProvoider.getUserInfo(id)
+      .do(x => console.log('chat x',x))
       .subscribe(uinfo =>{
         this.uInfoMap[uinfo.id] = uinfo;
       });
@@ -74,17 +90,25 @@ export class ChatPage {
 
  
 
-  ionViewDidLoad() {    
-    // Observable.fromEvent(this.textInput.getNativeElement(),"keyup")
-    // .map((e:any) => e.target.value)
-    // .debounceTime(300)
-    // .subscribe(value =>{
-    //   this.threadProvider.newThread
-    // })
+  ionViewDidLoad() {
+    this.pull(true);
   }
 
   ionViewWillEnter(){
-    this.scrollToBottom();
+    // this.scrollToBottom();
+  }
+
+  ionViewWillLeave(){
+    console.log('触发ionViewWillLeave');
+  }
+
+  ionViewDidLeave(){
+    this.threadProvider.newThread.next(this.thread);
+    console.log('触发ionViewDidLeave');
+  }
+
+  ionViewWillUnload(){
+    console.log('触发ionViewWillUnload');
   }
 
 
@@ -99,9 +123,14 @@ export class ChatPage {
       _.chain(messages).forEach(message =>{
         this.uInfo(message.senderId);
         this.messages.unshift(message);
+        if(message.state !== 0) {
+          this.mmap[message.localId] = message;
+        }
       })
       if(first){
+        setTimeout(() => {
           this.scrollToBottom();
+        }, 0);
       }
     });
   }
@@ -128,7 +157,7 @@ export class ChatPage {
 
   scrollToBottom(): void {
     let dim = this.scoll.getContentDimensions();
-    console.log(dim);
+    // console.log(dim);
     this.scoll.scrollTo(0,dim.scrollHeight);
     // this.scoll.scrollToBottom();
   }
@@ -138,7 +167,7 @@ export class ChatPage {
     let scrollHeight = dim.scrollHeight;
     let scrollTop = dim.scrollTop;
     let contentHeight = dim.contentHeight;
-    console.log(dim);
+    // console.log(dim);
     if(scrollHeight-(scrollTop+contentHeight)<100){
       this.scrollToBottom();
     }
