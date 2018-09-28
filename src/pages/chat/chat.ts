@@ -164,10 +164,11 @@ export class ChatPage {
   }
 
   scrollToBottom(): void {
-    let dim = this.scoll.getContentDimensions();
-    // console.log(dim);
-    this.scoll.scrollTo(0,dim.scrollHeight,0);
-    // this.scoll.scrollToBottom();
+    if(this.scoll){
+      let dim = this.scoll.getContentDimensions();
+      this.scoll.scrollTo(0,dim.scrollHeight,0);
+    }
+
   }
 
   onMessageScroll(){
@@ -177,8 +178,8 @@ export class ChatPage {
     let contentHeight = dim.contentHeight;
     // console.log(dim);
     if(scrollHeight-(scrollTop+contentHeight)<100){
-      // setTimeout(()=>this.scrollToBottom(),30);
-      this.scrollToBottom();
+      setTimeout(()=>this.scrollToBottom(),30);
+      // this.scrollToBottom();
     }
   }
 
