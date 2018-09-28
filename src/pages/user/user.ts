@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
-import { UserInfo } from '../../app/app.model';
+import { UserInfo, Rsp } from '../../app/app.model';
 import { ContactProvider } from '../../app/provider/contact.provider';
 import { UserProvider } from '../../app/provider/user.provider';
 import { Thread } from './../../app/app.model';
@@ -71,7 +71,7 @@ export class UserPage {
   addContact($event){
     this.contact.addContact({userId: this.userInfo.id})
     .subscribe(rsp => {
-      if(rsp.code === 0){
+      if(rsp.code === Rsp.SUCCESS){
         this.userInfo.isContact = true
       }
     })

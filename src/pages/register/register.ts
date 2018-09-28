@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { UserProvider } from '../../app/provider/user.provider';
-import { Register, Login } from '../../app/app.model';
+import { Register, Login, Rsp } from '../../app/app.model';
 
 /**
  * Generated class for the RegisterPage page.
@@ -33,7 +33,7 @@ export class RegisterPage {
 
     this.user.register(this.reg)
     .subscribe(rsp => {
-      if(rsp.code === 0){
+      if(rsp.code === Rsp.SUCCESS){
         let login = new Login(this.reg)
         this.user.login(login)
         .subscribe(rsp => {})

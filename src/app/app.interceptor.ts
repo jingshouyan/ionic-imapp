@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Rx';
 import { UUID } from 'angular2-uuid';
 import { ToastController, LoadingController, Loading } from 'ionic-angular';
 import { TokenProvider } from './provider/token.provider';
-import { Token } from './app.model';
+import { Token, Rsp } from './app.model';
 
 @Injectable()
 export class TokenInterceptor implements HttpInterceptor {
@@ -38,7 +38,7 @@ export class TokenInterceptor implements HttpInterceptor {
         let code = rsp.body['code']
         let message = rsp.body['message']
         if(isloading) loading.dismiss()
-        if(code !==0) this.toast(`[ ${code} ] ${message}`)
+        if(code !== Rsp.SUCCESS) this.toast(`[ ${code} ] ${message}`)
         if(code === 10005) this.tokenProvider.setToken(new Token)
       }         
       return rsp;

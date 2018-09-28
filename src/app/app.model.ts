@@ -47,6 +47,7 @@ export class Register {
 }
 
 export class Rsp {
+  static SUCCESS = 1;
   code:number
   message:string
   data:any
@@ -237,7 +238,7 @@ export class Message {
     this.flag = opt && opt.flag || 0
     this.relatedUsers = opt && opt.relatedUsers || []
     this.sentAt = opt && opt.sentAt || 0
-    this.localId = opt && opt.localId || new Date().getTime()
+    this.localId = opt && opt.localId || 0 - new Date().getTime()
     this.localTime = opt && opt.localTime || new Date().getTime()
     this.state = opt && opt.state || 0
     this.threadId = opt && opt.threadId || ''

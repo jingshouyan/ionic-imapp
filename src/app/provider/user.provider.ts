@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject, BehaviorSubject, Observable } from 'rxjs/Rx';
-import { User, Login, Token, Register } from '../app.model';
+import { User, Login, Token, Register, Rsp } from '../app.model';
 import { TokenProvider } from './token.provider';
 import { DbProvider, TABLES } from './db.provider';
 import { Storage } from '@ionic/storage';
@@ -26,7 +26,7 @@ export class UserProvider {
   t: Token = new Token
   userCache: {[id: string]: User} = {}
   constructor(
-    private api: ApiProvider,    
+    private api: ApiProvider,
     private token: TokenProvider,
     private db: DbProvider,
     private storage: Storage,
@@ -134,7 +134,7 @@ export class UserProvider {
     return this.api.post(endpoint,{ids: ids})
     .map(rsp => {
       let uMap: {[id: string]: User} = {};
-      if(rsp.code === 0 && rsp.data.length > 0){
+      if(rsp.code === Rsp.SUCCESS && rsp.data.length > 0){
         _.chain(rsp.data).forEach(row => {
           let u = new User(row);
           uMap[u.id] = u;
@@ -164,7 +164,7 @@ export class UserProvider {
     const endpoint = "user/login.json"
     return this.api.post(endpoint,login,true)
     .map(rsp => {
-      if(rsp.code === 0){
+      if(rsp.code === Rsp.SUCCESS){
         if(login.remember){
           this.storage.set("login",JSON.stringify(login))
           this.currentLogin.next(login)
@@ -187,7 +187,7 @@ export class UserProvider {
       const endpoint = "user/me.json"    
       this.api.post(endpoint,{})
       .subscribe(rsp =>{
-        if(rsp.code === 0 && rsp.data){
+        if(rsp.code === Rsp.SUCCESS && rsp.data){
           let user = new User(rsp.data);
           this.currentUser.next(user);
           this.newUser.next(user);
@@ -213,7 +213,7 @@ export class UserProvider {
     return this.api.post(endpoint,{q:q})
     .map(rsp =>{
       let users: User[] = []
-      if(rsp.code === 0 && rsp.data.list.length >0){
+      if(rsp.code === Rsp.SUCCESS && rsp.data.list.length >0){
         rsp.data.list.forEach(row => {
           let user = new User(row)
           users.push(user)

@@ -27,6 +27,7 @@ import { UserPage } from '../pages/user/user';
 import { ThreadPage } from '../pages/thread/thread';
 import { ThreadProvider } from './provider/thread.provider';
 import { UserInfoProvoider } from './provider/userInfo.provider';
+import { RoomCreatePage } from '../pages/room-create/room-create';
 
 
 @NgModule({
@@ -41,6 +42,7 @@ import { UserInfoProvoider } from './provider/userInfo.provider';
     SearchPage,
     UserPage,
     ChatPage,
+    RoomCreatePage,
   ],
   imports: [
     BrowserModule,
@@ -62,6 +64,7 @@ import { UserInfoProvoider } from './provider/userInfo.provider';
     SearchPage,
     UserPage,
     ChatPage,
+    RoomCreatePage,
   ],
   providers: [
     StatusBar,

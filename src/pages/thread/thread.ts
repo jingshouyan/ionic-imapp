@@ -4,6 +4,7 @@ import { ThreadProvider } from '../../app/provider/thread.provider';
 import { Thread } from '../../app/app.model';
 import { ChatPage } from './../chat/chat';
 import { Observable } from 'rxjs/Rx';
+import { RoomCreatePage } from '../room-create/room-create';
 
 /**
  * Generated class for the ThreadPage page.
@@ -45,6 +46,10 @@ export class ThreadPage {
       return "[草稿] "+thread.draft
     }
     return thread.latestMessage
+  }
+
+  room(){
+    this.navCtrl.push(RoomCreatePage);
   }
 
 }

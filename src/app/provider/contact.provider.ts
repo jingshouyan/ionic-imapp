@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject, Observable } from 'rxjs/Rx';
-import { Contact } from '../app.model';
+import { Contact, Rsp } from '../app.model';
 import { DbProvider, TABLES } from './db.provider';
 import { TokenProvider } from './token.provider';
 import { ApiProvider } from './api.provider';
@@ -89,7 +89,7 @@ export class ContactProvider {
   private syncContacts(){
     this.listContact(this.revision)
     .subscribe(rsp => {
-      if(rsp.code === 0 && rsp.data.length > 0){
+      if(rsp.code === Rsp.SUCCESS && rsp.data.length > 0){
         rsp.data.forEach(row => {
           row["id"] = row["userId"]
           let contact = new Contact(row)
@@ -111,7 +111,7 @@ export class ContactProvider {
     let endpoint = "relationship/addContact.json"
     return this.api.post(endpoint,{userId: opt.userId,remark: opt.remark,type: opt.type})
     .map(rsp =>{
-      if(rsp.code === 0){
+      if(rsp.code === Rsp.SUCCESS){
         this.syncContacts()
       }
       return rsp
@@ -123,7 +123,7 @@ export class ContactProvider {
     let endpoint = "relationship/delContact.json"
     return this.api.post(endpoint,{userId:id})
     .map(rsp=>{
-      if(rsp.code === 0){
+      if(rsp.code === Rsp.SUCCESS){
         this.syncContacts()
       }
       return rsp

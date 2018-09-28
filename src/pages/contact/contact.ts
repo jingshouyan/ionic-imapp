@@ -12,6 +12,7 @@ import { ContactProvider } from '../../app/provider/contact.provider';
 })
 export class ContactPage {
 
+
   contacts: Observable<UserInfo[]>;
 
   constructor(

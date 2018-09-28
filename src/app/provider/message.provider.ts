@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { SocketProvider } from "./socket.provider";
 import { DbProvider, TABLES } from "./db.provider";
-import { Msg, Message } from "../app.model";
+import { Msg, Message, Rsp } from "../app.model";
 import { Subject, Observable } from 'rxjs/Rx';
 import { TokenProvider } from "./token.provider";
 import { Token } from './../app.model';
@@ -58,27 +58,25 @@ export class MessageProvider {
 
 
   send(message: Message){
-    message.id = message.localId
+    message.id = message.localId;
     message.senderId = this.token.userId;
     message.threadId = message.tid(this.token.userId);
-    message.state = 1
+    message.state = 1;
     message.sentAt = new Date().getTime();
-    this.newMessage.next(message)
+    this.newMessage.next(message);
     return this.socket.send(message).do(rsp =>{
-      this.db.delete(TABLES.Msg,message).subscribe(() =>{
-        if(rsp.code === 0){
-          let msg = new Message(rsp.data)
-          msg.threadId = msg.tid(this.token.userId);
-          msg.localId = message.localId
-          this.newMessage.next(msg)
-        }
-        else{
-          let msg = new Message(message);
-          msg.state = 2;
-          this.newMessage.next(msg);
-        }
-
-      });
+      this.db.delete(TABLES.Msg,message).subscribe();
+      if(rsp.code === Rsp.SUCCESS){
+        let msg = new Message(rsp.data)
+        msg.threadId = msg.tid(this.token.userId);
+        msg.localId = message.localId
+        this.newMessage.next(msg)
+      }
+      else{
+        let msg = new Message(message);
+        msg.state = 2;
+        this.newMessage.next(msg);
+      }
     })
   }
 
