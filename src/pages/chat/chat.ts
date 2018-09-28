@@ -7,6 +7,7 @@ import { TokenProvider } from '../../app/provider/token.provider';
 import { UserInfo } from './../../app/app.model';
 import { UserInfoProvoider } from './../../app/provider/userInfo.provider';
 import _ from 'underscore';
+import { Subscription } from 'rxjs';
 /**
  * Generated class for the ChatPage page.
  *
@@ -38,6 +39,8 @@ export class ChatPage {
 
   myId: string = "";
 
+  subscriptions: Subscription[] = [];
+
   constructor(
     public navCtrl: NavController, 
     public navParams: NavParams,
@@ -47,10 +50,11 @@ export class ChatPage {
     public userInfoProvoider: UserInfoProvoider,
   ) {
     this.thread = new Thread(navParams.data)
-    threadProvider.getThread(this.thread.id)
+    
+    const s1 = threadProvider.getThread(this.thread.id)
     .subscribe(t => this.thread = t);
 
-    threadProvider.threadMessage(this.thread.id)
+    const s2 = threadProvider.threadMessage(this.thread.id)
     .subscribe(message =>{
       this.uInfo(message.senderId);
       let m = this.mmap[message.localId];
@@ -68,11 +72,13 @@ export class ChatPage {
 
       this.onMessageScroll();
     });
-    tokenProvider.currentToken.subscribe(t =>{
+    const s3 = tokenProvider.currentToken.subscribe(t =>{
       if(t && t.usable){
         this.myId = t.userId;
       }
     });
+
+    this.subscriptions = this.subscriptions.concat(s1,s2,s3);
   }
 
   uInfo(id: string){
@@ -101,6 +107,7 @@ export class ChatPage {
   ionViewWillLeave(){
     this.thread.unread = 0;
     this.threadProvider.newThread.next(this.thread);
+    this.subscriptions.forEach(s => s.unsubscribe());
     console.log('触发ionViewWillLeave');
   }
 
@@ -170,6 +177,7 @@ export class ChatPage {
     let contentHeight = dim.contentHeight;
     // console.log(dim);
     if(scrollHeight-(scrollTop+contentHeight)<100){
+      // setTimeout(()=>this.scrollToBottom(),30);
       this.scrollToBottom();
     }
   }
