@@ -11,7 +11,7 @@ export class SocketProvider {
   newMessage: Subject<Message> = new Subject<Message>()
   conn: Subject<boolean> = new BehaviorSubject<boolean>(false)
 
-  private baseUrl: string = "http://47.94.13.229?ticket="
+  private baseUrl: string = "http://127.0.0.1:8012?ticket="
   private socket: Socket = undefined
   private isConnected: boolean = false
   

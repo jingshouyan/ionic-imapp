@@ -15,7 +15,7 @@ export class ContactProvider {
   newContact: Subject<Contact> = new Subject();
   contactMap: Observable<{[id: string]: Contact}>;
   contactUpates: Subject<IContactOpt> = new Subject();
-  contacts: Subject<Contact[]> = new Subject();
+  // contacts: Subject<Contact[]> = new Subject();
 
   revision: number = 0;
   constructor(
@@ -30,11 +30,16 @@ export class ContactProvider {
       return opt(cMap);
     },{}).publishReplay(1).refCount();
 
+    // 当 db 中 contact 为空时， 刷新页面时， thread 列表页为空，
+    // 不知道为啥，没有这句 退出重新登录也可以
+    // 修改 userInfo.provider 的 uInfoMap 赋值方式，修复该问题。
+    // this.contactMap.subscribe();
 
     //当 token 变化时，推送清除数据操作到 threadUpdates
     token.currentToken.filter(t => {
       return t && t.usable();
     }).map((): IContactOpt => {
+      console.log("token change init contacts !");
       return (map:{[id: string]: Contact}) => {
         return {};
       };

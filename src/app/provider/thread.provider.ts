@@ -26,6 +26,8 @@ export class ThreadProvider {
     private message: MessageProvider,
   ){
 
+    this.threads.subscribe(ts => console.log("threads change!!",ts))
+
     // update 流 计算得到 threadMap
     this.threadMap = this.threadUpdates
     .scan((tMap:{[id: string]: Thread},opt: IThreadOpt) =>{
@@ -34,6 +36,7 @@ export class ThreadProvider {
 
     // threadMap 流转换为 threads
     this.threadMap.combineLatest(uInfo.uInfoMap.debounceTime(50),(tmap,imap) =>{
+
       _.forEach(tmap,(t) =>{
         if(t.targetType === 'user'){
           let i = imap[t.targetId];
@@ -49,6 +52,8 @@ export class ThreadProvider {
       return _.map(tMap,t=>t)
       .sort((a,b) => b.latestTime - a.latestTime);      
     }).subscribe(this.threads);
+
+    this.threadMap.subscribe(t => console.log("thread map",t));
 
     //当 token 变化时，推送清除数据操作到 threadUpdates
     token.currentToken.filter(t => {

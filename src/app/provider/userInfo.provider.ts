@@ -8,7 +8,7 @@ import _ from 'underscore';
 @Injectable()
 export class UserInfoProvoider {
 
-  uInfoMap: Observable<{[id: string]: UserInfo}>
+  uInfoMap: Subject<{[id: string]: UserInfo}> = new BehaviorSubject({});
   obsMap: {[id: string]: Observable<UserInfo> } = {};
   contacts : Subject<UserInfo[]> = new BehaviorSubject([]);
   
@@ -23,7 +23,7 @@ export class UserInfoProvoider {
 
     // userMap,contactMap 合并为 uInfoMap 流
     // debounceTime 防止运算量过大
-    this.uInfoMap = user.userMap.debounceTime(50)
+    user.userMap.debounceTime(50)
     .combineLatest(contact.contactMap.debounceTime(50),(umap,cmap) => {
       let uInfoMap: {[id: string]: UserInfo} = {};
       if(umap && cmap){
@@ -40,7 +40,7 @@ export class UserInfoProvoider {
         });
       }
       return uInfoMap;
-    });
+    }).subscribe(this.uInfoMap);
 
     this.uInfoMap.debounceTime(50).map(imap =>{
       let contacts: UserInfo[] = [];
