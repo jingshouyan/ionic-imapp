@@ -302,6 +302,7 @@ export class Room extends BaseBean {
   icon: string;
   userCount: number;
   revision: number;
+  _db: boolean;
 
   constructor(opt?: any){
     super(opt);
@@ -310,6 +311,7 @@ export class Room extends BaseBean {
     this.icon = opt && opt.icon || '';
     this.userCount = opt && opt.userCount || 0;
     this.revision = opt && opt.revision || 0;
+    this._db = opt && !!opt._db;
   }
 
 }
