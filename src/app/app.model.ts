@@ -1,5 +1,5 @@
 export class Conf {
-  static BATCH_SIZE = 1;
+  static BATCH_SIZE = 200;
 }
 export class BaseBean {
   createdAt: number;
