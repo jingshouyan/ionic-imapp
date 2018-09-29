@@ -1,8 +1,8 @@
-export enum TABLES{ User, Contact, Thread,Msg }
+export enum TABLES{ User, Contact, Thread, Msg, Room }
 import { Injectable } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { TokenProvider } from './token.provider';
-import { User, Thread, Contact, Msg } from '../app.model';
+import { User, Thread, Contact, Msg, Room } from '../app.model';
 import { Observable } from 'rxjs/Rx';
 import _ from 'underscore';
 const win: any = window;
@@ -50,11 +50,13 @@ export class DbProvider {
       this.dropTable(TABLES.Contact);
       this.dropTable(TABLES.Thread);
       this.dropTable(TABLES.Msg);
+      this.dropTable(TABLES.Room);
     }
     this.createTable(TABLES.User,new User());
     this.createTable(TABLES.Contact,new Contact());
     this.createTable(TABLES.Thread,new Thread());
     this.createTable(TABLES.Msg,new Msg());
+    this.createTable(TABLES.Room,new Room());
   }
 
   private dropTable(table: TABLES) {

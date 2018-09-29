@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Token } from '../app.model';
 import { Storage } from '@ionic/storage';
-import { Subject, BehaviorSubject } from 'rxjs/Rx';
+import { Subject, BehaviorSubject, Observable } from 'rxjs/Rx';
 
 @Injectable()
 export class TokenProvider {
 
   currentToken: Subject<Token> = new BehaviorSubject<Token>(null)
+
+  tokenChange: Observable<Token> = this.currentToken.filter(t => t && t.usable());
 
   constructor(
     private storage: Storage,

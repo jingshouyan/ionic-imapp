@@ -31,11 +31,7 @@ export class MessageProvider {
     private db: DbProvider,
     token: TokenProvider,
   ){
-    token.currentToken.subscribe(t=>{
-      if(t && t.usable()){
-        this.token = t;
-      }
-    });
+    token.tokenChange.subscribe(t=>this.token = t);
     socket.newMessage.subscribe(this.newMessage)
 
     this.newMessage.subscribe(message =>{

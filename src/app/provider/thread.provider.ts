@@ -56,9 +56,7 @@ export class ThreadProvider {
     this.threadMap.subscribe(t => console.log("thread map",t));
 
     //当 token 变化时，推送清除数据操作到 threadUpdates
-    token.currentToken.filter(t => {
-      return t && t.usable();
-    }).map((): IThreadOpt => {
+    token.tokenChange.map((): IThreadOpt => {
       return (map:{[id: string]: Thread}) => {
         return {};
       };
@@ -97,9 +95,8 @@ export class ThreadProvider {
 
 
 
-    token.currentToken.filter(t => {
-      return t && t.usable();
-    }).subscribe(t => {
+    token.tokenChange
+    .subscribe(t => {
       this.token = t;
       //从数据库中读取 thread 推送到 newThread
       this.db.list(TABLES.Thread).flatMap(rows => {

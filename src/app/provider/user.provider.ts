@@ -19,7 +19,7 @@ export class UserProvider {
   _userMap: {[id: string]: User} = {};
   uid: Subject<string> = new Subject();
 
-
+  // 当前登录用户信息
   currentUser: Subject<User> = new BehaviorSubject<User>(new User)
   currentLogin: Subject<Login> = new BehaviorSubject<Login>(new Login)
 
@@ -60,13 +60,12 @@ export class UserProvider {
     //从网络请求获取的信息 入库
     this.newUser.filter(u => !u._db)
     .subscribe(u =>{
-      this.db.replace(u,TABLES.User).subscribe(()=>{});
+      this.db.replace(u,TABLES.User).subscribe();
     });
 
     //检查 token，获取个人信息
-    token.currentToken.filter(t => {
-      return t && t.usable();
-    }).subscribe(t =>{
+    token.tokenChange
+    .subscribe(t =>{
       this.t = t;
       this.me();
     });

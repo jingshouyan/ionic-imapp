@@ -1,3 +1,6 @@
+export class Conf {
+  static BATCH_SIZE = 1;
+}
 export class BaseBean {
   createdAt: number;
   updatedAt: number;
@@ -297,7 +300,7 @@ export class Msg {
 }
 
 export class Room extends BaseBean {
-  id: number;
+  id: string;
   name: string;
   icon: string;
   userCount: number;
@@ -306,7 +309,7 @@ export class Room extends BaseBean {
 
   constructor(opt?: any){
     super(opt);
-    this.id = opt && opt.id || 0;
+    this.id = opt && opt.id || "";
     this.name = opt && opt.name || '';
     this.icon = opt && opt.icon || '';
     this.userCount = opt && opt.userCount || 0;

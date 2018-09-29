@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject, Observable } from 'rxjs/Rx';
-import { Contact, Rsp } from '../app.model';
+import { Contact, Rsp, Conf } from '../app.model';
 import { DbProvider, TABLES } from './db.provider';
 import { TokenProvider } from './token.provider';
 import { ApiProvider } from './api.provider';
@@ -17,6 +17,8 @@ export class ContactProvider {
   contactUpates: Subject<IContactOpt> = new Subject();
   // contacts: Subject<Contact[]> = new Subject();
 
+  
+
   revision: number = 0;
   constructor(
     private api: ApiProvider,
@@ -31,14 +33,14 @@ export class ContactProvider {
     },{}).publishReplay(1).refCount();
 
     //当 token 变化时，推送清除数据操作到 threadUpdates
-    token.currentToken.filter(t => {
-      return t && t.usable();
-    }).map((): IContactOpt => {
-      console.log("token change init contacts !");
+    token.tokenChange
+    .map((): IContactOpt => {
+      console.log("token change init contacts !!");
       return (map:{[id: string]: Contact}) => {
         return {};
       };
-    }).subscribe(this.contactUpates);
+    })
+    .subscribe(this.contactUpates);
 
     // newContact 更新到 update 
     this.newContact.map((contact): IContactOpt => {
@@ -50,12 +52,6 @@ export class ContactProvider {
       };
     }).subscribe(this.contactUpates);
 
-    // 更新 revision
-    this.newContact.subscribe(contact => {
-      if(contact.revision > this.revision){
-        this.revision = contact.revision
-      }
-    });
     // 存储到db
     this.newContact.subscribe(contact => {
       if(!contact._db ){
@@ -63,10 +59,16 @@ export class ContactProvider {
       }
     });
 
+    // 
+    this.newContact
+    .map(contact => contact.revision)
+    .filter(revision => revision > this.revision)
+    .subscribe(revision => this.revision = revision);
+
+
 
     //当 token 变化时，加载数据库数据
-    token.currentToken
-    .filter(t => t && t.usable())
+    token.tokenChange
     .subscribe(() =>{
       this.revision = 0;
       this.db.list(TABLES.Contact)
@@ -82,27 +84,33 @@ export class ContactProvider {
   }
 
 
+  
 
 
 
   // 通过网络同步数据
   private syncContacts(){
     this.listContact(this.revision)
-    .subscribe(rsp => {
-      if(rsp.code === Rsp.SUCCESS && rsp.data.length > 0){
-        rsp.data.forEach(row => {
-          row["id"] = row["userId"]
-          let contact = new Contact(row)
-          this.newContact.next(contact);
-        })
-      }
-    })
+    .filter(rsp => rsp.code === Rsp.SUCCESS && rsp.data.length > 0)
+    .map(
+      rsp => _.chain(rsp.data).map(row => {
+        row.id = row.userId;
+        const contact = new Contact(row);
+        return contact;
+      }).value()
+    )
+    .do(cs => 
+      cs.forEach(contact => this.newContact.next(contact))
+    )
+    .map(cs => cs.length)
+    .filter(size => size === Conf.BATCH_SIZE)
+    .subscribe(size =>this.syncContacts());        
   }
 
 
   private listContact(revision) {
     let endpoint = "relationship/listContact.json"
-    return this.api.post(endpoint,{revision: revision})    
+    return this.api.post(endpoint,{revision: revision,size: Conf.BATCH_SIZE})    
   }
 
 
@@ -130,11 +138,4 @@ export class ContactProvider {
     })
   }
 
-
-
-  //准备废弃
-  getContact(id: string): Contact{
-
-    return undefined
-  }
 }
