@@ -8,7 +8,6 @@ import _ from 'underscore';
 import { UserInfoProvoider } from "./userInfo.provider";
 import { RoomProvider } from "./room.provider";
 
-const initMap = {};
 interface IThreadOpt extends Function {
   (tMap: {[id: string]: Thread}): {[id: string]: Thread};
 }
@@ -35,7 +34,7 @@ export class ThreadProvider {
     this.threadMap = this.threadUpdates
     .scan((tMap:{[id: string]: Thread},opt: IThreadOpt) =>{
       return opt(tMap);
-    },initMap).publishReplay(1).refCount();
+    },{}).publishReplay(1).refCount();
 
     // threadMap 流转换为 threads
     this.threadMap.combineLatest(uInfo.uInfoMap.debounceTime(50),
@@ -73,7 +72,7 @@ export class ThreadProvider {
     this.threadMap.subscribe(t => console.log("thread map",t));
 
     //当 token 变化时，推送清除数据操作到 threadUpdates
-    token.tokenChange.map(()=>()=>initMap)
+    token.tokenChange.map(()=>()=>{return {}})
     .subscribe(this.threadUpdates);
 
     //newThread 流 推送到 threadUPdates

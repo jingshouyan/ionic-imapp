@@ -10,7 +10,6 @@ import { MessageProvider } from "./message.provider";
 interface IRoomOpt extends Function {
     (uMap: {[id: string]: Room}): {[id: string]: Room};
 }
-const initMap = {};
 @Injectable()
 export class RoomProvider {
 
@@ -29,7 +28,7 @@ export class RoomProvider {
         message: MessageProvider,
     ){
         this.roomMap = this.roomUpdates
-        .scan((rMap: {[id: string]: Room},opt: IRoomOpt) => opt(rMap),initMap)
+        .scan((rMap: {[id: string]: Room},opt: IRoomOpt) => opt(rMap),{})
         .publishReplay(1).refCount();
 
         this.roomMap.subscribe(map => this._map = map);
@@ -70,7 +69,7 @@ export class RoomProvider {
         });
 
         token.tokenChange
-        .map(() => () => initMap)
+        .map(() => () => {return {}})
         .subscribe(this.roomUpdates);
 
         message.newMessage
