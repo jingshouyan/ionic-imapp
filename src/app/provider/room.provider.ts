@@ -22,7 +22,7 @@ export class RoomProvider {
 
     constructor(
         private api: ApiProvider,
-        private token: TokenProvider,
+        token: TokenProvider,
         private db: DbProvider,
     ){
         this.roomMap = this.roomUpdates
@@ -73,8 +73,11 @@ export class RoomProvider {
     
 
     create(userIds: string[],name){
+        const roomUsers = _.chain(userIds).map(userId => {
+            return {userId: userId};
+        }).value();
         const endpoint = "relationship/createRoom.json";
-        this.api.post(endpoint,{name: name,roomUsers: userIds})
+        return this.api.post(endpoint,{name: name,roomUsers: roomUsers})
         .do(rsp => {
             if(rsp.code === Rsp.SUCCESS){
                 this.syncData();
@@ -85,11 +88,19 @@ export class RoomProvider {
     private syncData(){
         this.listRoom(this.revision)
         .filter(rsp => rsp.code === Rsp.SUCCESS && rsp.data.length > 0)
-
+        .map(
+            rsp => _.chain(rsp.data)
+            .map(row => Room.fromServe(row))
+            .value()
+        )
+        .do(rooms => rooms.forEach(room => this.newRoom.next(room)))
+        .map(rooms => rooms.length)
+        .filter(size => size >= Conf.BATCH_SIZE)
+        .subscribe(() => this.syncData());
     }
 
     private listRoom(revision){
-        let endpoint = "relationship/listContact.json"
+        let endpoint = "relationship/listRoom.json"
         return this.api.post(endpoint,{revision: revision,size: Conf.BATCH_SIZE})    
     }
 }

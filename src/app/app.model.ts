@@ -305,6 +305,7 @@ export class Room extends BaseBean {
   icon: string;
   userCount: number;
   revision: number;
+
   _db: boolean;
 
   constructor(opt?: any){
@@ -315,6 +316,12 @@ export class Room extends BaseBean {
     this.userCount = opt && opt.userCount || 0;
     this.revision = opt && opt.revision || 0;
     this._db = opt && !!opt._db;
+  }
+
+  static fromServe(opt?: any): Room {
+    const room = new Room(opt.room);
+    room.revision = opt.revisionRoom;
+    return room;
   }
 
 }

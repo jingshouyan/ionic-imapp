@@ -28,6 +28,7 @@ import { ThreadPage } from '../pages/thread/thread';
 import { ThreadProvider } from './provider/thread.provider';
 import { UserInfoProvoider } from './provider/userInfo.provider';
 import { RoomCreatePage } from '../pages/room-create/room-create';
+import { RoomProvider } from './provider/room.provider';
 
 
 @NgModule({
@@ -78,6 +79,7 @@ import { RoomCreatePage } from '../pages/room-create/room-create';
     MessageProvider,
     ThreadProvider,
     UserInfoProvoider,
+    RoomProvider,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     {provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
   ]
