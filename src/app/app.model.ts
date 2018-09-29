@@ -324,6 +324,10 @@ export class Room extends BaseBean {
     return room;
   }
 
+  avatar(){
+    return this.icon || "assets/imgs/room.png";
+  }
+
 }
 
 

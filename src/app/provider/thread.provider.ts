@@ -6,7 +6,9 @@ import { MessageProvider } from "./message.provider";
 import { Subject, Observable, BehaviorSubject } from 'rxjs/Rx';
 import _ from 'underscore';
 import { UserInfoProvoider } from "./userInfo.provider";
+import { RoomProvider } from "./room.provider";
 
+const initMap = {};
 interface IThreadOpt extends Function {
   (tMap: {[id: string]: Thread}): {[id: string]: Thread};
 }
@@ -23,6 +25,7 @@ export class ThreadProvider {
     private db :DbProvider,
     token: TokenProvider,
     uInfo: UserInfoProvoider,
+    room: RoomProvider,
     private message: MessageProvider,
   ){
 
@@ -32,35 +35,45 @@ export class ThreadProvider {
     this.threadMap = this.threadUpdates
     .scan((tMap:{[id: string]: Thread},opt: IThreadOpt) =>{
       return opt(tMap);
-    },{}).publishReplay(1).refCount();
+    },initMap).publishReplay(1).refCount();
 
     // threadMap 流转换为 threads
-    this.threadMap.combineLatest(uInfo.uInfoMap.debounceTime(50),(tmap,imap) =>{
-
-      _.forEach(tmap,(t) =>{
-        if(t.targetType === 'user'){
-          let i = imap[t.targetId];
-          if(i){
-            t.name = i.name();
-            t.icon = i.avatar();
+    this.threadMap.combineLatest(uInfo.uInfoMap.debounceTime(50),
+      (tmap,imap) =>{
+        _.forEach(tmap,(t) =>{
+          if(t.targetType === 'user'){
+            let i = imap[t.targetId];
+            if(i){
+              t.name = i.name();
+              t.icon = i.avatar();
+            }
           }
-        }
-      })
+        });
       return tmap;
     })
+    .combineLatest(room.roomMap.debounceTime(50),
+      (tmap,rmap) =>{
+        _.forEach(rmap, r =>{
+          const t = tmap[r.id+"#room"];
+          if(t){
+            t.name = r.name;
+            t.icon = r.avatar();
+          }
+        })
+        return tmap;
+      }
+    )
     .map(tMap => {
       return _.map(tMap,t=>t)
       .sort((a,b) => b.latestTime - a.latestTime);      
     }).subscribe(this.threads);
 
+
+
     this.threadMap.subscribe(t => console.log("thread map",t));
 
     //当 token 变化时，推送清除数据操作到 threadUpdates
-    token.tokenChange.map((): IThreadOpt => {
-      return (map:{[id: string]: Thread}) => {
-        return {};
-      };
-    })
+    token.tokenChange.map(()=>()=>initMap)
     .subscribe(this.threadUpdates);
 
     //newThread 流 推送到 threadUPdates
@@ -114,7 +127,7 @@ export class ThreadProvider {
     this.message.newMessage.map(message => {
       let t = this.token;
       let targetId = message.targetId == t.userId ? message.senderId : message.targetId;
-      let unread = message.targetId == t.userId ? 1: 0;
+      let unread = message.senderId == t.userId ? 0: 1;
       let msgCtx = this.msgCtx(message);
       let thread = new Thread({
         latestMessage: msgCtx,
@@ -146,6 +159,7 @@ export class ThreadProvider {
   getThread(tid: string){
     return this.threadMap
     .map(tmap => tmap[tid])
+    .do(t => console.log("getTHread" ,t,tid))
     .filter(t => !!t);
   }
 

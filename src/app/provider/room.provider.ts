@@ -5,6 +5,7 @@ import { DbProvider, TABLES } from "./db.provider";
 import { Rsp, Room, Conf } from "../app.model";
 import { Subject, Observable } from "rxjs";
 import _ from 'underscore';
+import { MessageProvider } from "./message.provider";
 
 interface IRoomOpt extends Function {
     (uMap: {[id: string]: Room}): {[id: string]: Room};
@@ -18,16 +19,20 @@ export class RoomProvider {
     roomMap: Observable<{[id: string]: Room}>;
 
     revision = 0;
+    _map:{[id: string]: Room} = {};
 
 
     constructor(
         private api: ApiProvider,
         token: TokenProvider,
         private db: DbProvider,
+        message: MessageProvider,
     ){
         this.roomMap = this.roomUpdates
         .scan((rMap: {[id: string]: Room},opt: IRoomOpt) => opt(rMap),initMap)
         .publishReplay(1).refCount();
+
+        this.roomMap.subscribe(map => this._map = map);
 
         //从服务器获取的信息入库
         this.newRoom.filter(r => !r._db)
@@ -68,6 +73,13 @@ export class RoomProvider {
         .map(() => () => initMap)
         .subscribe(this.roomUpdates);
 
+        message.newMessage
+        .filter(m => m.targetType == 'room')
+        .map(m => m.targetId)
+        .do(id => console.log("xdfd",id))
+        .distinctUntilChanged()
+        .filter(id => !this._map[id])
+        .subscribe(() => this.syncData());
     }
 
     

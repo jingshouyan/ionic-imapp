@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { UserInfoProvoider } from '../../app/provider/userInfo.provider';
 import { Observable } from 'rxjs';
-import { UserInfo, Rsp, Room } from '../../app/app.model';
+import { UserInfo, Rsp, Room, Thread } from '../../app/app.model';
 import _ from 'underscore';
 import { RoomProvider } from '../../app/provider/room.provider';
 import { ChatPage } from '../chat/chat';
@@ -44,7 +44,13 @@ export class RoomCreatePage {
     .filter(rsp => rsp.code === Rsp.SUCCESS)
     .map(rsp => new Room(rsp.data))
     .subscribe(room => {
-      this.navCtrl.push(ChatPage,room);
+      const thread = new Thread({
+        name: room.name,
+        icon: room.avatar(),
+        targetId: room.id,
+        targetType: 'room'
+      })
+      this.navCtrl.push(ChatPage,thread);
     });
   }
 

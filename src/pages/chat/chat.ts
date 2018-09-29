@@ -8,6 +8,7 @@ import { UserInfo } from './../../app/app.model';
 import { UserInfoProvoider } from './../../app/provider/userInfo.provider';
 import _ from 'underscore';
 import { Subscription } from 'rxjs';
+import { ThreadPage } from '../thread/thread';
 /**
  * Generated class for the ChatPage page.
  *
@@ -50,7 +51,7 @@ export class ChatPage {
     public userInfoProvoider: UserInfoProvoider,
   ) {
     this.thread = new Thread(navParams.data)
-    
+    console.log(this.thread);
     const s1 = threadProvider.getThread(this.thread.id)
     .subscribe(t => this.thread = t);
 
