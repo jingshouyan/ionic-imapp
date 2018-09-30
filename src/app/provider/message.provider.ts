@@ -5,6 +5,7 @@ import { Msg, Message, Rsp } from "../app.model";
 import { Subject, Observable } from 'rxjs/Rx';
 import { TokenProvider } from "./token.provider";
 import { Token } from './../app.model';
+import { ApiProvider } from "./api.provider";
 
 
 
@@ -30,6 +31,7 @@ export class MessageProvider {
     private socket: SocketProvider,
     private db: DbProvider,
     token: TokenProvider,
+    private api: ApiProvider,
   ){
     token.tokenChange.subscribe(t=>this.token = t);
     socket.newMessage.subscribe(this.newMessage)
@@ -60,7 +62,7 @@ export class MessageProvider {
     message.state = 1;
     message.sentAt = new Date().getTime();
     this.newMessage.next(message);
-    return this.socket.send(message).do(rsp =>{
+    return this.httpSend(message).do(rsp =>{
       this.db.delete(TABLES.Msg,message).subscribe();
       if(rsp.code === Rsp.SUCCESS){
         let msg = new Message(rsp.data)
@@ -68,12 +70,17 @@ export class MessageProvider {
         msg.localId = message.localId
         this.newMessage.next(msg)
       }
-      else{
+      else {
         let msg = new Message(message);
         msg.state = 2;
         this.newMessage.next(msg);
       }
     })
+  }
+
+  httpSend(message){
+    const endpoint = "message/sendMessage.json";
+    return this.api.post(endpoint,message);
   }
 
 }
